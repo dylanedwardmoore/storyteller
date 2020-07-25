@@ -3,64 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sampleModuleData = exports.root = exports.moduleConfig = void 0;
+exports.root = void 0;
 var make_1 = __importDefault(require("../core/util/make"));
-exports.moduleConfig = {
-    initialState: { variables: {}, currentConvoSegmentPath: make_1.default.absoluteConvoSegmentPath(['root', 'start']) }
-};
-var restartChoice = {
-    text: '/goToStart',
-    logic: [{
-            conditional: false,
-            do: [{
-                    type: 'goto',
-                    path: ['root', 'start']
-                }]
-        }]
-};
-var nestedModule = make_1.default.module({
-    id: 'child',
-    submodules: [],
-    convoSegments: [{
-            id: 'childSegment',
-            convo: [{
-                    type: 'text',
-                    text: 'this is a child convo segment'
-                }, {
-                    type: 'text',
-                    text: 'it has two parts'
-                }],
-            choices: [
-                {
-                    text: '/relativeChild',
-                    logic: [{
-                            do: [{
-                                    type: 'goto',
-                                    path: ['otherChildSegement']
-                                }]
-                        }]
-                }
-            ]
-        }, {
-            id: 'otherChildSegement',
-            convo: [{
-                    type: 'text',
-                    text: 'this is the other child node'
-                }],
-            choices: [{
-                    text: '/goBackToStart',
-                    logic: [{
-                            do: [{
-                                    type: 'goto',
-                                    path: ['root', 'start']
-                                }]
-                        }]
-                }]
-        }]
-});
+var child_module_1 = require("./child-module");
 exports.root = make_1.default.module({
     id: 'root',
-    submodules: [nestedModule],
+    submodules: [child_module_1.nestedModule],
     convoSegments: [{
             id: 'start',
             convo: [{
@@ -113,8 +61,4 @@ exports.root = make_1.default.module({
                 }]
         }]
 });
-exports.sampleModuleData = {
-    module: exports.root,
-    moduleConfig: exports.moduleConfig
-};
 //# sourceMappingURL=sample-root.js.map

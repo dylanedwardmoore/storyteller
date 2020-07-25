@@ -1,4 +1,6 @@
-### Scripts
+# Storyteller
+
+Welcome! I'll be updating this readme in the next few days to make it more informative. In the meantime, I recommend following the example in 
 
 #### `npm run start:dev`
 
