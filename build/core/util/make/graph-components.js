@@ -11,6 +11,7 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.module = exports.absoluteConvoSegmentPath = void 0;
 var Either_1 = require("fp-ts/lib/Either");
 function convoModuleId(unvalidatedId) {
     return unvalidatedId;
@@ -18,18 +19,30 @@ function convoModuleId(unvalidatedId) {
 function convoSegmentId(unvalidatedId) {
     return unvalidatedId;
 }
+function absoluteConvoSegmentPath(content) {
+    if (content.length == 0) {
+        throw new Error("Empty convo segment path is not allowed");
+    }
+    if (content.length == 1) {
+        throw new Error("To make an absolute path, you must specify the parent modules");
+    }
+    return convoSegmentPath(content);
+}
+exports.absoluteConvoSegmentPath = absoluteConvoSegmentPath;
 function convoSegmentPath(content) {
     if (content.length === 0) {
         throw new Error("Empty convo segment path is not allowed");
     }
     var parentModules = content.slice(0, content.length - 1).map(function (unverified) { return convoModuleId(unverified); });
     var id = convoSegmentId(content[content.length - 1]);
-    return {
+    var relativePath = parentModules.length > 0;
+    return relativePath ? {
         id: id,
         parentModules: parentModules
+    } : {
+        id: id
     };
 }
-exports.convoSegmentPath = convoSegmentPath;
 function convoLogicAction(content) {
     return {
         type: 'start-convo-segment',
@@ -47,11 +60,11 @@ function conditional(content) {
 }
 function convoLogic(content) {
     return content.map(function (unvalidated) {
-        if (unvalidated.conditional) {
+        if (unvalidated.if !== undefined) {
             return {
                 if: conditional(unvalidated.if),
                 do: convoLogicActions(unvalidated.do),
-                otherwise: convoLogicActions(unvalidated.otherwise)
+                otherwise: unvalidated.otherwise ? convoLogicActions(unvalidated.otherwise) : []
             };
         }
         else {

@@ -8,11 +8,6 @@ type APIKey = string
 export type ChatCommand = string
 
 export type ModuleConfig = {
-    name: string
-    welcomeMessage?: string
-    farwellMessage?: string
-    startModuleCommand: ChatCommand,
-    endModuleCommand: ChatCommand,
     initialState: InitialUserState
 }
 
@@ -22,7 +17,7 @@ export type ModuleData = {
 }
 
 export interface ChatClient {
-    runModules: (modulesData: ModuleData[], convoManagerConstructor: ConvoManagerConstructor) => void
+    runModule: (module: ModuleData, convoManagerConstructor: ConvoManagerConstructor) => void
 }
 
 export type ChatClientConstructor = (key: APIKey) => ChatClient

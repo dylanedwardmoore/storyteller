@@ -9,7 +9,7 @@ import TextNode, { TextNodeNominalType } from "../../models/convo-engine/convo-g
 import { Text, Filepath, Condition } from "../../models/convo-engine/convo-graph/expression";
 import { right } from "fp-ts/lib/Either";
 import { ConditionalConvoLogic, ConvoLogic, ConvoLogicAction } from "../../models/convo-engine/convo-graph/convo-logic";
-import { ConvoSegmentPath } from "../../models/convo-engine/convo-graph/convo-path";
+import { ConvoSegmentPath, AbsoluteConvoSegmentPath } from "../../models/convo-engine/convo-graph/convo-path";
 
 
 function convoModuleId(unvalidatedId: _ModuleId): ConvoModuleId {
@@ -20,15 +20,28 @@ function convoSegmentId(unvalidatedId: _ConvoSegmentId): ConvoSegmentId {
     return unvalidatedId as ConvoSegmentId
 }
 
-export function convoSegmentPath(content: _ConvoSegmentPath): ConvoSegmentPath {
+export function absoluteConvoSegmentPath(content: _ConvoSegmentPath): AbsoluteConvoSegmentPath {
+    if (content.length == 0) {
+        throw new Error(`Empty convo segment path is not allowed`)
+    }
+    if (content.length == 1) {
+        throw new Error(`To make an absolute path, you must specify the parent modules`)
+    }
+    return convoSegmentPath(content) as AbsoluteConvoSegmentPath
+}
+
+function convoSegmentPath(content: _ConvoSegmentPath): ConvoSegmentPath {
     if (content.length === 0) {
         throw new Error(`Empty convo segment path is not allowed`)
     }
     const parentModules: ConvoModuleId[] = content.slice(0, content.length - 1).map(unverified => convoModuleId(unverified))
     const id: ConvoSegmentId = convoSegmentId(content[content.length - 1])
-    return {
+    const relativePath = parentModules.length > 0
+    return relativePath ? {
         id,
         parentModules
+    } : {
+        id
     }
 }
 
@@ -53,11 +66,11 @@ function conditional(content: _Condition): Condition {
 
 function convoLogic(content: _Logic[]): ConvoLogic {
     return content.map(unvalidated => {
-        if (unvalidated.conditional) {
+        if (unvalidated.if !== undefined) {
         return {
                 if: conditional(unvalidated.if),
                 do: convoLogicActions(unvalidated.do),
-                otherwise: convoLogicActions(unvalidated.otherwise)
+                otherwise: unvalidated.otherwise ? convoLogicActions(unvalidated.otherwise) : []
             }
         } else {
             return {

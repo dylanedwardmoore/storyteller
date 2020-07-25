@@ -2,7 +2,7 @@ import { StateManagerConstructor, StateNavigationFunctions, StateNavigationStore
 import ConvoModule, { ConvoModuleId } from "../models/convo-engine/convo-graph/convo-module";
 import HistoryManager from "../models/state/managers/history-manager";
 import { NavigationStoreState, InitialUserState, VariableStoreState } from "../models/state/state";
-import { ConvoSegmentPath } from "../models/convo-engine/convo-graph/convo-path";
+import { ConvoSegmentPath, AbsoluteConvoSegmentPath } from "../models/convo-engine/convo-graph/convo-path";
 import { Either, tryCatch, fold } from "fp-ts/lib/Either";
 import ConvoSegment from "../models/convo-engine/convo-graph/convo-segment";
 import { getNominalValue } from "../util/util-functions";
@@ -17,8 +17,15 @@ const stateNavigationStoreFunctionsConstructor: (onInitState: InitialUserState, 
     // Restore history to cache using history manager
     
     return {
-        setCurrentConvoSegmentPath: path => cache.currentConvoSegmentPath = path,
-        getCurrentConvoSegmentPath: () => cache.currentConvoSegmentPath
+        setCurrentConvoSegmentPath: path => { 
+            const absolutePath = relativePathToAbsolute(path, cache.currentConvoSegmentPath)
+            log.silly(`update current path to `, absolutePath)
+            cache.currentConvoSegmentPath = absolutePath
+        },
+        getCurrentConvoSegmentPath: () => {
+            log.silly(`getting current convo path, which is `, cache.currentConvoSegmentPath)
+            return cache.currentConvoSegmentPath
+        }
     }
 
 }
@@ -49,21 +56,25 @@ const pathWithoutRootId: (rootId: ConvoModuleId, path: ConvoSegmentPath) => Conv
     }
 }
 
-const relativePathToAbsolute: (possiblyRelativePath: ConvoSegmentPath, currentAbsolutePath: ConvoSegmentPath) => ConvoSegmentPath = (possiblyRelativePath, currentAbsolutePath) => {
+const relativePathToAbsolute: (possiblyRelativePath: ConvoSegmentPath, currentAbsolutePath: AbsoluteConvoSegmentPath) => AbsoluteConvoSegmentPath = (possiblyRelativePath, currentAbsolutePath) => {
     if (currentAbsolutePath.parentModules === undefined) {
         throw new Error('Current path can never be relative, parent modules must be defined.')
     }
-    if (possiblyRelativePath.parentModules === undefined) {
+    const parentModules = possiblyRelativePath.parentModules
+    if (parentModules === undefined) {
         return {
             ...possiblyRelativePath,
             parentModules: currentAbsolutePath.parentModules
         }
     } else {
-        return possiblyRelativePath
+        return {
+            ...possiblyRelativePath,
+            parentModules
+        }
     }
 }
 
-const safelyGetConvoSegment: (rootModule: ConvoModule, path: ConvoSegmentPath, currentPath: ConvoSegmentPath) => Either<Error, ConvoSegment> = (rootModule, currentPath, path) => {
+const safelyGetConvoSegment: (rootModule: ConvoModule, path: ConvoSegmentPath, currentPath: AbsoluteConvoSegmentPath) => Either<Error, ConvoSegment> = (rootModule, path, currentPath) => {
     const unsafeRetreive: (path: ConvoSegmentPath) => ConvoSegment = path => {
         const absolutePathExcludingRootId = pathWithoutRootId(
             rootModule.id,
@@ -85,7 +96,7 @@ const getCurrentConvoSegment: (rootModule: ConvoModule, navigationStoreFunctions
     const currentPath = navigationStoreFunctions.getCurrentConvoSegmentPath()
     const currentConvoSegmentOrError = safelyGetConvoSegment(rootModule, currentPath, currentPath)
     const errorHandling: (error: Error) => ConvoSegment = error => {
-        log.trace(`Unretreivable current convo segment for current convo path: ${JSON.stringify(currentPath)}\nPlease run server with module path tests enabled to help debug this issue.`)
+        log.trace(`Unretreivable current convo segment for current convo path: `, currentPath, `Please run server with module path tests enabled to help debug this issue.`)
         throw error
     }
     const folding: (resultOrError: Either<Error, ConvoSegment>) => ConvoSegment = fold(errorHandling, identity)
@@ -95,7 +106,8 @@ const getCurrentConvoSegment: (rootModule: ConvoModule, navigationStoreFunctions
 const stateNavigationFunctionsConstructor: (rootModule: ConvoModule, navigationStoreFunctions: StateNavigationStoreFunctions) => StateNavigationFunctions = (rootModule, navigationStoreFunctions) => {
     return {
         safelyGetConvoSegment: path => safelyGetConvoSegment(rootModule, path, navigationStoreFunctions.getCurrentConvoSegmentPath()),
-        getCurrentConvoSegment: () => getCurrentConvoSegment(rootModule, navigationStoreFunctions)
+        getCurrentConvoSegment: () => getCurrentConvoSegment(rootModule, navigationStoreFunctions),
+        getAbsolutePath: path => relativePathToAbsolute(path, navigationStoreFunctions.getCurrentConvoSegmentPath())
     }
 }
 

@@ -10,7 +10,7 @@ export type UserIdNominalType = 'uuid'
 export type UserId = Id<UserIdNominalType>
 
 export type NavigationStoreState = {
-    currentConvoSegmentPath: ConvoSegmentPath
+    currentConvoSegmentPath: Required<ConvoSegmentPath>
 }
 
 export type VariableStoreState = {

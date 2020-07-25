@@ -11,3 +11,5 @@ export type ConvoSegmentPath = Readonly<{
     // Path is considered relative if parent modules is undefined
     parentModules?: ModulePath
 }>
+
+export type AbsoluteConvoSegmentPath = Required<ConvoSegmentPath>

@@ -1,5 +1,5 @@
 import { UserId, StateVariable, InitialUserState } from "../state";
-import { ConvoSegmentPath } from "../../convo-engine/convo-graph/convo-path";
+import { ConvoSegmentPath, AbsoluteConvoSegmentPath } from "../../convo-engine/convo-graph/convo-path";
 import { Nominal } from "../../common/common-types";
 import ConvoSegment from "../../convo-engine/convo-graph/convo-segment";
 import ConvoModule from "../../convo-engine/convo-graph/convo-module";
@@ -9,7 +9,7 @@ import { Either } from "fp-ts/lib/Either";
 
 export interface StateNavigationStoreFunctions {
     setCurrentConvoSegmentPath: (path: ConvoSegmentPath) => void
-    getCurrentConvoSegmentPath: () => ConvoSegmentPath
+    getCurrentConvoSegmentPath: () => AbsoluteConvoSegmentPath
 }
 
 export interface StateVariableStoreFunctions {
@@ -19,7 +19,8 @@ export interface StateVariableStoreFunctions {
 
 export interface StateNavigationFunctions {
     safelyGetConvoSegment: (path: ConvoSegmentPath) => Either<Error, ConvoSegment>,
-    getCurrentConvoSegment: () => ConvoSegment
+    getCurrentConvoSegment: () => ConvoSegment,
+    getAbsolutePath: (path: ConvoSegmentPath) => AbsoluteConvoSegmentPath
 }
 
 // export type StateDependant<T> = (stateVariableFunctions: StateVariableStoreFunctions) => T

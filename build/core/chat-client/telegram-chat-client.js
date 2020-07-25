@@ -1,80 +1,53 @@
 "use strict";
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var logging_1 = __importStar(require("../util/logging"));
+exports.telegramClient = void 0;
+var logging_1 = __importDefault(require("../util/logging"));
+var Keyboard = require('telegraf-keyboard');
 var Telegraf = require('telegraf');
 var session = require('telegraf/session');
-var Stage = require('telegraf/stage');
-var Scene = require('telegraf/scenes/base');
-var enter = Stage.enter, leave = Stage.leave;
+function getKeyboardWithButtons(buttons) {
+    var keyboardOptions = {
+        inline: false,
+        duplicates: false,
+        newline: false,
+    };
+    var keyboard = new Keyboard(keyboardOptions);
+    buttons.map(function (text) { return keyboard.add(text); });
+    return keyboard;
+}
 function renderWithContext(ctx) {
     return {
-        replyText: function (text) {
-            logging_1.default.trace('reply in chat with the text message: ', text);
-            ctx.reply(text);
+        replyText: function (text, buttons) {
+            logging_1.default.debug('reply in chat with the text message: ', text);
+            ctx.replyWithHTML(text, getKeyboardWithButtons(buttons).draw());
         },
-        showButtons: function (text) {
-            logging_1.default.trace('display on keyboard: ', text);
+        replyImage: function (src, buttons) {
+            logging_1.default.debug('reply in chat with the image: ', src);
+            ctx.replyWithPhoto({ url: "" + src }, getKeyboardWithButtons(buttons).draw());
         }
     };
-}
-function createSceneFromModule(_a, convoManagerConstructor) {
-    var module = _a.module, moduleConfig = _a.moduleConfig;
-    var name = moduleConfig.name, welcomeMessage = moduleConfig.welcomeMessage, farwellMessage = moduleConfig.farwellMessage, endModuleCommand = moduleConfig.endModuleCommand, initialState = moduleConfig.initialState;
-    var convoManager = convoManagerConstructor(module, initialState);
-    var telegrafScene = new Scene(name);
-    if (welcomeMessage) {
-        telegrafScene.enter(function (ctx) { return ctx.reply(welcomeMessage); });
-    }
-    if (farwellMessage) {
-        telegrafScene.leave(function (ctx) { return ctx.reply(farwellMessage); });
-    }
-    telegrafScene.command(endModuleCommand, leave());
-    // TODO: add in other global commands
-    // if (globalCommands !== undefined) {
-    //     globalCommands.forEach(({ command, effect }: CommandAndEffect) => {
-    //         telegrafScene.command(command, convoManager.handleEffect(effect))
-    //     })
-    // }
-    logging_1.default.debug("handling response");
-    telegrafScene.on('text', function (ctx) {
-        logging_1.default.info('respond to user input text ', ctx.message.text);
-        logging_1.jsonLogger.silly('context object is ', ctx);
-        var renderFunctions = renderWithContext(ctx);
-        convoManager.respondToUserInput(ctx.from.username, ctx.message.text, renderFunctions);
-    });
-    telegrafScene.on('message', function (ctx) { return ctx.reply('Only text messages please'); });
-    return telegrafScene;
 }
 exports.telegramClient = function (apiKey) {
     var bot = new Telegraf(apiKey);
     return {
-        runModules: function (modulesData, convoManagerConstructor) {
-            var scenes = modulesData.map(function (moduleData) {
-                return createSceneFromModule(moduleData, convoManagerConstructor);
-            });
-            var stage = new Stage(scenes);
+        runModule: function (moduleData, convoManagerConstructor) {
             bot.use(session());
-            bot.use(stage.middleware());
-            var defaultMessage = 'Try sending ';
-            modulesData.forEach(function (_a) {
-                var moduleOptions = _a.moduleConfig;
-                bot.command(moduleOptions.startModuleCommand, function (ctx) {
-                    logging_1.default.debug("start module command recieved");
-                    ctx.scene.enter(moduleOptions.name);
-                });
-                defaultMessage += moduleOptions.startModuleCommand + ' or ';
+            var convoManager = convoManagerConstructor(moduleData.module, moduleData.moduleConfig.initialState);
+            bot.on('text', function (ctx) {
+                logging_1.default.debug("received user input");
+                var renderFunctions = renderWithContext(ctx);
+                convoManager.respondToUserInput(ctx.from.id, ctx.message.text, renderFunctions);
             });
-            bot.on('message', function (ctx) { return ctx.reply(defaultMessage); });
+            bot.on('message', function (ctx) {
+                logging_1.default.debug("received user input as message other than text");
+                ctx.reply('Only text messages please');
+            });
             logging_1.default.debug("telegram client is configured and waiting for messages.");
             bot.launch();
-        },
+        }
     };
 };
 //# sourceMappingURL=telegram-chat-client.js.map

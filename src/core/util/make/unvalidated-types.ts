@@ -5,6 +5,7 @@
  */
 
 import ConvoModule from "../../models/convo-engine/convo-graph/convo-module"
+import UserChoice from "../../models/convo-engine/convo-graph/user-choice"
 
 
 export type _ModuleId = string
@@ -41,13 +42,9 @@ export type _ConvoAction = {
 export type _Action = _ConvoAction
 
 export type _Logic = {
-    conditional: true
-    if: _Condition
+    if?: _Condition
     do: _Action[]
-    otherwise: _Action[]
-} | {
-    conditional: false
-    do: _Action[]
+    otherwise?: _Action[]
 }
 
 export type _Choice = {
