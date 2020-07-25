@@ -1,6 +1,6 @@
 # Storyteller
 
-Welcome! I'll be updating this readme in the next few days to make it more informative as well as adding several additional features. In the meantime, I recommend following the example to set up your own story.
+Welcome! I'll be updating this readme in the next few days to make it more informative as well as adding several additional features to the *Storyteller* project. In the meantime, I recommend checking out the example I have in the `modules` folder to get a sense for how to create your own story, when you feel ready you can go ahead and replace that with your own work.
 
 ## Installation
 
