@@ -1,6 +1,6 @@
 # Storyteller
 
-Welcome! I'll be updating this readme in the next few days to make it more informative. In the meantime, I recommend following the example in 
+Welcome! I'll be updating this readme in the next few days to make it more informative as well as adding several additional features. In the meantime, I recommend following the example to set up your own story.
 
 #### `npm run start:dev`
 
