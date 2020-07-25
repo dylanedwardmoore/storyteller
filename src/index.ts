@@ -1,7 +1,7 @@
 import * as dotenv from "dotenv";
 import { telegramClient } from "./core/chat-client/telegram-chat-client";
 import log from "./core/util/logging";
-import { sampleModuleData } from "./modules/sample-root";
+import { sampleModuleData } from "./modules/config";
 import { convoManagerConstructor } from "./core/convo-engine/convo-manager";
 dotenv.config();
 const apiKey = process.env.BOT_TOKEN
