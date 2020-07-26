@@ -1,6 +1,5 @@
-import ImageNode from "./image-node";
-import TextNode from "./text-node";
-
+import ImageNode from './image-node'
+import TextNode from './text-node'
 
 type ConvoNode = ImageNode | TextNode
 

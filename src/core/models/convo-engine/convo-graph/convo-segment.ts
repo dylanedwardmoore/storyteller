@@ -1,8 +1,7 @@
-import ConvoNode from "./convo-node";
-import UserChoice from "./user-choice";
-import { ConvoLogic } from "./convo-logic";
-import { Id, Nominal } from "../../common/common-types";
-
+import ConvoNode from './convo-node'
+import UserChoice from './user-choice'
+import { ConvoLogic } from './convo-logic'
+import { Id, Nominal } from '../../common/common-types'
 
 export type ConvoSegmentIdNominalType = 'convo-segment-id'
 

@@ -1,5 +1,12 @@
 import { module } from './graph-components'
-import { choice, logic, text, image, convoSegmentPath, condition } from './unvalidated-type-constructors'
+import {
+    choice,
+    logic,
+    text,
+    image,
+    convoSegmentPath,
+    condition,
+} from './unvalidated-type-constructors'
 
 const make = {
     module,
@@ -8,7 +15,7 @@ const make = {
     text,
     image,
     convoSegmentPath,
-    condition
+    condition,
 }
 
 export default make

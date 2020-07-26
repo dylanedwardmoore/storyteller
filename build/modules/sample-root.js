@@ -17,9 +17,9 @@ exports.root = make_1.default.module({
                 }],
             choices: [
                 {
-                    text: '/sample2',
+                    text: '/start',
                     logic: [{
-                            if: false,
+                            if: true,
                             do: [{
                                     type: 'goto',
                                     path: ['root', 'sample2']

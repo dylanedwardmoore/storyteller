@@ -1,4 +1,4 @@
-import { StateVariable, InitialUserState } from "../state";
+import { StateVariable, Stores } from "../state";
 import { ConvoSegmentPath, AbsoluteConvoSegmentPath } from "../../convo-engine/convo-graph/convo-path";
 import ConvoSegment from "../../convo-engine/convo-graph/convo-segment";
 import ConvoModule from "../../convo-engine/convo-graph/convo-module";
@@ -19,6 +19,6 @@ export interface StateNavigationFunctions {
 }
 export declare type StateManager = StateVariableStoreFunctions & StateNavigationFunctions & StateNavigationStoreFunctions;
 export declare type StateManagerConstructor = {
-    getOrInitUserState: (rootModule: ConvoModule, onInitState: InitialUserState, historyManager: HistoryManager) => StateManager;
+    getOrInitUserState: (rootModule: ConvoModule, onInitState: Stores, historyManager: HistoryManager) => StateManager;
 };
 export default StateManager;

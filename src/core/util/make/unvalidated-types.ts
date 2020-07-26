@@ -1,12 +1,11 @@
-/* 
- * Note: The underscore '_' here is used to disabiguate 
- * these unvalidated types from 
+/*
+ * Note: The underscore '_' here is used to disabiguate
+ * these unvalidated types from
  * their validated counterparts elsewhere
  */
 
-import ConvoModule from "../../models/convo-engine/convo-graph/convo-module"
-import UserChoice from "../../models/convo-engine/convo-graph/user-choice"
-
+import ConvoModule from '../../models/convo-engine/convo-graph/convo-module'
+import UserChoice from '../../models/convo-engine/convo-graph/user-choice'
 
 export type _ModuleId = string
 
@@ -14,17 +13,17 @@ export type _ConvoSegmentId = string
 
 export type _ConvoSegmentPath = string[]
 
-export type _Text = string 
+export type _Text = string
 
-export type _Filepath = string 
+export type _Filepath = string
 
 export type _ImageNode = {
-    type: "image"
+    type: 'image'
     src: string
 }
 
 export type _TextNode = {
-    type: "text"
+    type: 'text'
     text: _Text
 }
 
@@ -59,7 +58,7 @@ export type _ConvoSegment = {
 }
 
 export type _ConvoModule = {
-    id: _ModuleId,
-    submodules?: ConvoModule[],
+    id: _ModuleId
+    submodules?: ConvoModule[]
     convoSegments?: _ConvoSegment[]
 }

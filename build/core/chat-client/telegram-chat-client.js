@@ -33,9 +33,13 @@ function renderWithContext(ctx) {
 exports.telegramClient = function (apiKey) {
     var bot = new Telegraf(apiKey);
     return {
-        runModule: function (moduleData, convoManagerConstructor) {
+        runModule: function (storytellerConfig, convoManagerConstructor) {
             bot.use(session());
-            var convoManager = convoManagerConstructor(moduleData.module, moduleData.moduleConfig.initialState);
+            var initStateStores = {
+                variables: storytellerConfig.initialState,
+                currentConvoSegmentPath: storytellerConfig.startingConvoSegmentPath
+            };
+            var convoManager = convoManagerConstructor(storytellerConfig.rootModule, initStateStores);
             bot.on('text', function (ctx) {
                 logging_1.default.debug("received user input");
                 var renderFunctions = renderWithContext(ctx);

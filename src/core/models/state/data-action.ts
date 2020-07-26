@@ -1,5 +1,4 @@
-import { JSONValue } from "../common/common-types"
-
+import { JSONValue } from '../common/common-types'
 
 export type UpdateValue = {
     type: 'update-value-data-action'

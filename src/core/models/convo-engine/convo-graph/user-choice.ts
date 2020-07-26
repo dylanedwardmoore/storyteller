@@ -1,10 +1,9 @@
-import { Text } from "./expression";
-import { ConvoLogic } from "./convo-logic";
-
+import { Text } from './expression'
+import { ConvoLogic } from './convo-logic'
 
 type UserChoice = Readonly<{
     text: Text
-    logic: ConvoLogic 
+    logic: ConvoLogic
 }>
 
 export default UserChoice

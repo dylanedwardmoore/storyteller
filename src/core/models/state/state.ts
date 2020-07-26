@@ -1,9 +1,15 @@
-import { JSONValue, PlainObject, Id } from "../common/common-types"
-import { ConvoSegmentPath } from "../convo-engine/convo-graph/convo-path"
-import { EventRecord, EventRecordId } from "./event-record"
-
+import { JSONValue, PlainObject, Id } from '../common/common-types'
+import { ConvoSegmentPath } from '../convo-engine/convo-graph/convo-path'
+import { EventRecord, EventRecordId } from './event-record'
 
 export type StateVariable = JSONValue
+
+/*
+ * To make the core agnostic from content,
+ * we normalize all incoming state types to
+ * GeneralizedState, as defined here.
+ */
+export type GeneralizedState = PlainObject<StateVariable>
 
 export type UserIdNominalType = 'uuid'
 
@@ -14,7 +20,7 @@ export type NavigationStoreState = {
 }
 
 export type VariableStoreState = {
-    variables: PlainObject<StateVariable>
+    variables: GeneralizedState
 }
 
 export type UserHistoryState = {
@@ -22,4 +28,4 @@ export type UserHistoryState = {
     revertedEvents: Set<EventRecordId>
 }
 
-export type InitialUserState = VariableStoreState & NavigationStoreState
+export type Stores = VariableStoreState & NavigationStoreState

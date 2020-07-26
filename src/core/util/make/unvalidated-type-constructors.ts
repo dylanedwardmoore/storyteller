@@ -1,4 +1,11 @@
-import { _Choice, _Logic, _Text, _ImageNode, _ConvoSegmentPath, _Condition } from "./unvalidated-types";
+import {
+    _Choice,
+    _Logic,
+    _Text,
+    _ImageNode,
+    _ConvoSegmentPath,
+    _Condition,
+} from './unvalidated-types'
 
 type Identity<T> = (value: T) => T
 
