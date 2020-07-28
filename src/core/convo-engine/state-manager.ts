@@ -61,10 +61,14 @@ const stateVariableStoreFunctionsConstructor: (
     // Restore history to cache using history manager
 
     return {
-        getStateVariable: key => cache.variables[key],
-        setStateVariable: (key, newValue) => {
-            cache.variables[key] = newValue
-        },
+        getState: () => cache.variables,
+        updateState: updates => {
+            const previousState = cache.variables
+            cache.variables = {
+                ...previousState,
+                ...updates
+            }
+        }
     }
 }
 
@@ -106,7 +110,7 @@ const relativePathToAbsolute: (
     }
 }
 
-const safelyGetConvoSegment: (
+export const safelyGetConvoSegment: (
     rootModule: ConvoModule,
     path: ConvoSegmentPath,
     currentPath: AbsoluteConvoSegmentPath
@@ -126,7 +130,12 @@ const safelyGetConvoSegment: (
             reducer,
             rootModule
         )
-        return nestedModule.convoSegments[path.id]
+        const resultOrUndefined = nestedModule.convoSegments[path.id]
+        if (resultOrUndefined === undefined) {
+            throw new Error(`No convo segment with the specified id is defined`)
+        } else {
+            return resultOrUndefined
+        }
     }
 
     return tryCatch(

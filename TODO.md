@@ -13,6 +13,10 @@
 - allow for integration with other chat platforms by confining how far telegram code can propagate into the codebase
 
 ## other
+- remove or figure out what is going on with post convo logic... seems unnecessary honestly
+- Add better support for async responses, i.e. when user clicks buttons quickly wait on previous response.
+- Add support for module middlware in the form of higher level functions that get piped into "create module", these might also provide global user response options, like 'help'. — e.g. help menu
+- Add better error message with button update when user input does not match
 - make state work correctly, full readonly state is passed into expressions
 - allow for state to be generically typed
 - enable history

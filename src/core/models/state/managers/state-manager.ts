@@ -1,4 +1,4 @@
-import { UserId, StateVariable, Stores } from '../state'
+import { UserId, StateVariable, Stores, GeneralizedState, GeneralizedStateUpdate, GeneralizedStateInstance } from '../state'
 import {
     ConvoSegmentPath,
     AbsoluteConvoSegmentPath,
@@ -15,8 +15,8 @@ export interface StateNavigationStoreFunctions {
 }
 
 export interface StateVariableStoreFunctions {
-    setStateVariable: (key: string, newValue: StateVariable) => void
-    getStateVariable: (key: string) => StateVariable
+    getState: () => GeneralizedStateInstance
+    updateState: (updates: GeneralizedStateUpdate) => void
 }
 
 export interface StateNavigationFunctions {

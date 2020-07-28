@@ -17,4 +17,5 @@ if (apiKey === undefined) {
 
 const client = telegramClient(apiKey)
 log.debug(`Initialized telegram client, attempting to run modules`)
+
 client.runModule(storytellerContentConfigurations, convoManagerConstructor)

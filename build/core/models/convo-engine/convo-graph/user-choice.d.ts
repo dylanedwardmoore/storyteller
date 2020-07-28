@@ -1,5 +1,5 @@
-import { Text } from "./expression";
-import { ConvoLogic } from "./convo-logic";
+import { Text } from './expression';
+import { ConvoLogic } from './convo-logic';
 declare type UserChoice = Readonly<{
     text: Text;
     logic: ConvoLogic;

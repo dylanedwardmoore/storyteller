@@ -1,7 +1,8 @@
 import { StorytellerConfig } from './core/models/chat-client/chat-client'
 import { root } from './modules/sample-root'
 import { absoluteConvoSegmentPath } from './core/util/make/graph-components'
-import { State, initialState } from './state/state-config'
+import { initialState } from './state/state-config'
+import { runPrelanchTests } from './prelaunch-tests'
 
 /*
  * Define your config here. This should have a reference to your root module, starting convoSegment path,
@@ -12,7 +13,9 @@ import { State, initialState } from './state/state-config'
 
 const rootModule = root
 
-const startingConvoSegmentPath = absoluteConvoSegmentPath(['root', 'start'])
+const usePreLaunchTests: boolean = true
+
+const startingConvoSegmentPath = absoluteConvoSegmentPath(['root', '/start'])
 
 ///// Stop editing. Don't change anything below this
 
@@ -20,6 +23,10 @@ const storytellerContentConfigurations: StorytellerConfig = {
     rootModule,
     initialState,
     startingConvoSegmentPath,
+}
+
+if (usePreLaunchTests) {
+    runPrelanchTests(storytellerContentConfigurations)
 }
 
 export default storytellerContentConfigurations

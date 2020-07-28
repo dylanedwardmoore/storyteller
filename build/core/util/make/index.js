@@ -9,7 +9,7 @@ var make = {
     text: unvalidated_type_constructors_1.text,
     image: unvalidated_type_constructors_1.image,
     convoSegmentPath: unvalidated_type_constructors_1.convoSegmentPath,
-    condition: unvalidated_type_constructors_1.condition
+    condition: unvalidated_type_constructors_1.condition,
 };
 exports.default = make;
 //# sourceMappingURL=index.js.map

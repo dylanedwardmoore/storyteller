@@ -27,7 +27,7 @@ function renderWithContext(ctx) {
         replyImage: function (src, buttons) {
             logging_1.default.debug('reply in chat with the image: ', src);
             ctx.replyWithPhoto({ url: "" + src }, getKeyboardWithButtons(buttons).draw());
-        }
+        },
     };
 }
 exports.telegramClient = function (apiKey) {
@@ -37,7 +37,7 @@ exports.telegramClient = function (apiKey) {
             bot.use(session());
             var initStateStores = {
                 variables: storytellerConfig.initialState,
-                currentConvoSegmentPath: storytellerConfig.startingConvoSegmentPath
+                currentConvoSegmentPath: storytellerConfig.startingConvoSegmentPath,
             };
             var convoManager = convoManagerConstructor(storytellerConfig.rootModule, initStateStores);
             bot.on('text', function (ctx) {
@@ -51,7 +51,7 @@ exports.telegramClient = function (apiKey) {
             });
             logging_1.default.debug("telegram client is configured and waiting for messages.");
             bot.launch();
-        }
+        },
     };
 };
 //# sourceMappingURL=telegram-chat-client.js.map

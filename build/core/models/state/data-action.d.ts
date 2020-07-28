@@ -1,8 +1,7 @@
-import { JSONValue } from "../common/common-types";
-export declare type UpdateValue = {
-    type: 'update-value-data-action';
-    key: string;
-    value: JSONValue;
+import { StateUpdate } from '../convo-engine/convo-graph/expression';
+export declare type UpdateState = {
+    type: 'update-state-data-action';
+    updates: StateUpdate;
 };
-declare type DataAction = Readonly<UpdateValue>;
+declare type DataAction = Readonly<UpdateState>;
 export default DataAction;

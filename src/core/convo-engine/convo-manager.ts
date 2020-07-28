@@ -4,9 +4,9 @@ import UserChoice from '../models/convo-engine/convo-graph/user-choice'
 import {
     evaluateText,
     evaluateCondition,
-    getNominalValue,
     onError,
     evaluateFilePath,
+    evaluateStateUpdate,
 } from '../util/util-functions'
 import log from '../util/logging'
 import {
@@ -17,26 +17,29 @@ import ConvoNode from '../models/convo-engine/convo-graph/convo-node'
 import RenderInChat from '../models/chat-client/render-interface'
 import { stateManagerConstructor } from './state-manager'
 import HistoryManager from '../models/state/managers/history-manager'
-import { UserId, Stores } from '../models/state/state'
+import { UserId, Stores, GeneralizedState, GeneralizedStateInstance } from '../models/state/state'
 import ConvoModule from '../models/convo-engine/convo-graph/convo-module'
 
 const choiceMatchesUserInput: (
-    userInput: string
-) => (choice: UserChoice) => boolean = userInput => choice => {
+    userInput: string,
+    stateInstance: GeneralizedStateInstance
+) => (choice: UserChoice) => boolean = (userInput, stateInstance) => choice => {
     // Any choice that thows an error will resolve by default to the empty string and thus never match user's input
     const errorHandler = onError(
         `Choice text expression resolves to error.\nUser input = ${userInput}`,
         ''
     )
-    return evaluateText(choice.text, errorHandler) === userInput
+    return evaluateText(choice.text, errorHandler, stateInstance) === userInput
 }
 
 const displayConvoNode: (
     chatRenderFunctions: RenderInChat,
-    keyboardButtons: string[]
+    keyboardButtons: string[],
+    stateInstance: Readonly<GeneralizedState>
 ) => (convoNode: ConvoNode) => void = (
     chatRenderFunctions,
-    keyboardButtons
+    keyboardButtons,
+    stateInstance
 ) => convoNode => {
     switch (convoNode.__TYPE__) {
         case 'image-node':
@@ -45,14 +48,15 @@ const displayConvoNode: (
                 'SERVER ERROR'
             )
             chatRenderFunctions.replyImage(
-                evaluateFilePath(convoNode.src, errorHandler),
+                evaluateFilePath(convoNode.src, errorHandler, stateInstance),
                 keyboardButtons
             )
             break
         case 'text-node':
             const replyText = evaluateText(
                 convoNode.text,
-                onError('Error evaluating convoNode text', 'SERVER ERROR')
+                onError('Error evaluating convoNode text', 'SERVER ERROR'),
+                stateInstance
             )
             log.debug(`send reply`, replyText)
             chatRenderFunctions.replyText(replyText, keyboardButtons)
@@ -69,35 +73,39 @@ interface ExecuteActionParams {
     chatRenderFunctions: RenderInChat
 }
 
-const keyboardButtonFromChoice: (choice: UserChoice) => string = choice => {
+const keyboardButtonFromChoice: (stateInstance: GeneralizedState) => (choice: UserChoice) => string = stateInstance => choice => {
     const errorHandler = onError(
         `Choice text expression resolves to error.`,
         'SERVER ERROR'
     )
-    return evaluateText(choice.text, errorHandler)
+    return evaluateText(choice.text, errorHandler, stateInstance)
+}
+
+const keyboardButtonsFromChoices: (stateInstance: GeneralizedStateInstance, choices: UserChoice[]) => string[] = (stateInstance, choices) => {
+    const keyboardButtonFromChoiceWithState = keyboardButtonFromChoice(stateInstance)
+    return choices.map(keyboardButtonFromChoiceWithState)
 }
 
 const executeAction: (params: ExecuteActionParams) => void = params => {
     const { action, stateManager, chatRenderFunctions } = params
     log.debug(`Executing action`, action)
-    switch (action.type) {
+    switch (action.type) { 
         case 'start-convo-segment':
             // TODO: Add support for pre convo logic
             log.debug(`Set convo path to `, action.path)
             stateManager.setCurrentConvoSegmentPath(action.path)
             const convoSegment = stateManager.getCurrentConvoSegment()
-            const keyboardButtons = convoSegment.choices.map(
-                keyboardButtonFromChoice
-            )
+            const keyboardButtons = keyboardButtonsFromChoices(stateManager.getState(), convoSegment.choices)
             convoSegment.convoNodes.forEach(
-                displayConvoNode(chatRenderFunctions, keyboardButtons)
+                displayConvoNode(chatRenderFunctions, keyboardButtons, stateManager.getState())
             )
-            // TODO: Add support for post convo logic
             break
-        // case 'update-value-data-action':
-        // log.debug(`Update value`)
-        // TODO: Add support for variables
-        // break
+        case 'update-state-data-action':
+            log.debug(`Update state with state updates: `, action.updates)
+            const errorHandler = onError(`Error evaluating state update expression, this is likely a problem with logic in the module's definition.\nThe user state will NOT be updated.`, {})
+            const evaluatedStateUpdate = evaluateStateUpdate(action.updates, errorHandler, stateManager.getState())
+            stateManager.updateState(evaluatedStateUpdate)
+            break
         default:
             log.trace('Error! This should be unreachable code')
             break
@@ -121,7 +129,7 @@ const executeConvoLogic: (logic: ExecuteConvoLogicParams) => void = params => {
         )
         const curriedExecuteAction = (action: ConvoLogicAction) =>
             executeAction({ action, stateManager, chatRenderFunctions })
-        if (evaluateCondition(conditionalLogic.if, errorHandler)) {
+        if (evaluateCondition(conditionalLogic.if, errorHandler, stateManager.getState())) {
             log.debug(`Condition evalutes to 'true', handling 'then'`)
             conditionalLogic.do.forEach(curriedExecuteAction)
         } else {
@@ -187,7 +195,7 @@ export const convoManagerConstructor: ConvoManagerConstructor = (
             )
             const currentConvoSegment = stateManager.getCurrentConvoSegment()
             const selectedUserChoice = currentConvoSegment.choices.find(
-                choiceMatchesUserInput(userInput)
+                choiceMatchesUserInput(userInput, stateManager.getState())
             )
             if (selectedUserChoice !== undefined) {
                 log.debug(
@@ -202,7 +210,9 @@ export const convoManagerConstructor: ConvoManagerConstructor = (
                 })
             } else {
                 log.debug(`User input ${userInput} matches NO choices`)
-                // Respond that the user input does not match any of the available user choices for this convo node
+                const keyboardButtons = keyboardButtonsFromChoices(stateManager.getState(), currentConvoSegment.choices)
+                const defaultResponse = `Sorry, I don't recognize your response of <i>${userInput}</i> right now. Try responding with one of the buttons in the chat keyboard.`
+                chatRenderFunctions.replyText(defaultResponse, keyboardButtons)
             }
         },
     }

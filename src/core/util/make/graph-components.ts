@@ -1,7 +1,6 @@
 import ConvoModule, {
     ConvoModuleId,
 } from '../../models/convo-engine/convo-graph/convo-module'
-import ConvoAction from '../../models/convo-engine/convo-graph/convo-action'
 import {
     _ConvoModule,
     _ConvoSegment,
@@ -15,8 +14,12 @@ import {
     _Filepath,
     _Logic,
     _Condition,
-    _ConvoAction,
+    _StartConvoAction,
     _ConvoSegmentPath,
+    ResultOrStateDependentResult,
+    _Action,
+    _UpdateStateAction,
+    _StateUpdate
 } from './unvalidated-types'
 import ConvoSegment, {
     ConvoSegmentId,
@@ -25,16 +28,14 @@ import UserChoice from '../../models/convo-engine/convo-graph/user-choice'
 import ConvoNode from '../../models/convo-engine/convo-graph/convo-node'
 import ImageNode from '../../models/convo-engine/convo-graph/image-node'
 import TextNode, {
-    TextNodeNominalType,
 } from '../../models/convo-engine/convo-graph/text-node'
 import {
     Text,
     Filepath,
     Condition,
+    StateUpdate,
 } from '../../models/convo-engine/convo-graph/expression'
-import { right } from 'fp-ts/lib/Either'
 import {
-    ConditionalConvoLogic,
     ConvoLogic,
     ConvoLogicAction,
 } from '../../models/convo-engine/convo-graph/convo-logic'
@@ -42,6 +43,9 @@ import {
     ConvoSegmentPath,
     AbsoluteConvoSegmentPath,
 } from '../../models/convo-engine/convo-graph/convo-path'
+import { StateDependentResult, GeneralizedState } from '../../models/state/state'
+import { JSONValue } from '../../models/common/common-types'
+import { trace } from 'console'
 
 function convoModuleId(unvalidatedId: _ModuleId): ConvoModuleId {
     return unvalidatedId as ConvoModuleId
@@ -84,23 +88,54 @@ function convoSegmentPath(content: _ConvoSegmentPath): ConvoSegmentPath {
           }
 }
 
-function convoLogicAction(content: _ConvoAction): ConvoLogicAction {
+function startConvoAction(content: _StartConvoAction): ConvoLogicAction {
     return {
         type: 'start-convo-segment',
         path: convoSegmentPath(content.path),
     }
 }
 
-function convoLogicActions(content: _ConvoAction[]): ConvoLogicAction[] {
-    return content.map(unvalidated => convoLogicAction(unvalidated))
+function updateStateAction(content: _UpdateStateAction): ConvoLogicAction {
+    return {
+        type: 'update-state-data-action',
+        updates: stateUpdate(content.update)
+    }
+}
+
+function logicActions(content: _Action[]): ConvoLogicAction[] {
+    return content.map(unvalidated => {
+        switch (unvalidated.type) {
+            case 'goto':
+                return startConvoAction(unvalidated)
+            case 'update-state':
+                return updateStateAction(unvalidated)
+            default:
+                throw new Error('Unreachable code: this switch-case statement should be exaustive')
+        }
+    })
+}
+
+function wrapAsStateDependentExpression<T extends JSONValue>(resultOrStateDependentResult: ResultOrStateDependentResult<T>): 
+    { stateDependentResult: StateDependentResult<T> } {
+
+    const wrap = (inner: StateDependentResult<T>) => ({ stateDependentResult: inner })
+    if (typeof resultOrStateDependentResult === 'function') {
+        return wrap(resultOrStateDependentResult as StateDependentResult<T>)
+    } else {
+        return wrap((state => resultOrStateDependentResult) as StateDependentResult<T>)
+    }
 }
 
 function text(content: _Text): Text {
-    return right(content) as Text
+    return wrapAsStateDependentExpression(content) as Text
+}
+
+function stateUpdate(content: _StateUpdate): StateUpdate {
+    return wrapAsStateDependentExpression(content) as StateUpdate
 }
 
 function conditional(content: _Condition): Condition {
-    return right(content) as Condition
+    return wrapAsStateDependentExpression(content) as Condition
 }
 
 function convoLogic(content: _Logic[]): ConvoLogic {
@@ -108,16 +143,18 @@ function convoLogic(content: _Logic[]): ConvoLogic {
         if (unvalidated.if !== undefined) {
             return {
                 if: conditional(unvalidated.if),
-                do: convoLogicActions(unvalidated.do),
+                do: logicActions(unvalidated.do),
                 otherwise: unvalidated.otherwise
-                    ? convoLogicActions(unvalidated.otherwise)
+                    ? logicActions(unvalidated.otherwise)
                     : [],
+                _compiledWithoutConditional: false
             }
         } else {
             return {
                 if: conditional(true),
-                do: convoLogicActions(unvalidated.do),
-                otherwise: convoLogicActions(unvalidated.do),
+                do: logicActions(unvalidated.do),
+                otherwise: logicActions(unvalidated.do),
+                _compiledWithoutConditional: true
             }
         }
     })
@@ -131,7 +168,7 @@ function choice(content: _Choice): UserChoice {
 }
 
 function filepath(content: _Filepath): Filepath {
-    return right(content) as Filepath
+    return wrapAsStateDependentExpression(content) as Filepath
 }
 
 function imageNode(content: _ImageNode): ImageNode {

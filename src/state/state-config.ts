@@ -8,9 +8,9 @@
  */
 
 export type State = {
-    test: string
+    testValue: number
 }
 
 export const initialState: State = {
-    test: '4',
+    testValue: 0,
 }

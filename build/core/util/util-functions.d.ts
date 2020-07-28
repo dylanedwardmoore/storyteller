@@ -1,8 +1,12 @@
-import { Nominal, ErrorHandler } from "../models/common/common-types";
-import { Text, Condition, Number, Filepath } from "../models/convo-engine/convo-graph/expression";
+import { Nominal, ErrorHandler } from '../models/common/common-types';
+import { Text, Condition, Number, Filepath, StateUpdate } from '../models/convo-engine/convo-graph/expression';
+import { GeneralizedStateInstance, GeneralizedStateUpdate } from '../models/state/state';
 export declare function getNominalValue<K, T>(nominal: Nominal<K, T>): T;
 export declare function onError<T>(message: string, defaultReturnValue: T): (error: Error) => T;
-export declare const evaluateText: (textExpression: Text, onError: ErrorHandler<string>) => string;
-export declare const evaluateCondition: (conditionExpression: Condition, onError: ErrorHandler<boolean>) => boolean;
-export declare const evaluateNumber: (numberExpression: Number, onError: ErrorHandler<number>) => number;
-export declare const evaluateFilePath: (filepathExpression: Filepath, onError: ErrorHandler<string>) => string;
+export declare function concatArraysReducer<T>(accumulator: T[], current: T[]): T[];
+export declare function noDuplicates<T>(arr: T[]): T[];
+export declare const evaluateStateUpdate: (stateUpdateExpression: StateUpdate, onError: ErrorHandler<GeneralizedStateUpdate>, stateInstance: GeneralizedStateInstance) => Partial<Readonly<Record<string, import("../models/common/common-types").JSONValue>>>;
+export declare const evaluateText: (textExpression: Text, onError: ErrorHandler<string>, stateInstance: GeneralizedStateInstance) => string;
+export declare const evaluateCondition: (conditionExpression: Condition, onError: ErrorHandler<boolean>, stateInstance: GeneralizedStateInstance) => boolean;
+export declare const evaluateNumber: (numberExpression: Number, onError: ErrorHandler<number>, stateInstance: GeneralizedStateInstance) => number;
+export declare const evaluateFilePath: (filepathExpression: Filepath, onError: ErrorHandler<string>, stateInstance: GeneralizedStateInstance) => string;

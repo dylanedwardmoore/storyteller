@@ -1,37 +1,61 @@
 import make from '../core/util/make'
 import { nestedModule } from './child-module'
+import { stateManagerConstructor } from '../core/convo-engine/state-manager'
+import log from '../core/util/logging'
 
 export const root = make.module({
     id: 'root',
     submodules: [nestedModule],
     convoSegments: [
         {
-            id: 'start',
+            id: '/start',
             convo: [
                 {
                     type: 'text',
                     text: 'this chatbot says welcome',
                 },
+                {
+                    type: 'text',
+                    text: state => 'test value is ' + state.testValue,
+                }
             ],
             choices: [
                 {
                     text: '/start',
                     logic: [
                         {
-                            if: true,
                             do: [
                                 {
                                     type: 'goto',
-                                    path: ['root', 'sample2'],
+                                    path: ['root', 'sample2'], 
                                 },
+                            ]
+                        }
+                    ],
+                },
+                {
+                    text: 'updateCounter',
+                    logic: [
+                        {
+                            if: state => state.testValue < 3,
+                            do: [{
+                                type: 'update-state',
+                                update: state => ({ testValue: state.testValue + 1 })
+                            },
+                            {
+                                type: 'goto',
+                                path: ['root', '/start'],
+                            },
                             ],
-                            otherwise: [
-                                {
-                                    type: 'goto',
-                                    path: ['root', 'child', 'childSegment'],
-                                },
-                            ],
-                        },
+                            otherwise: [{
+                                type: 'update-state',
+                                update: { testValue: 0 },
+                            },
+                            {
+                                type: 'goto',
+                                path: ['root', '/start'],
+                            }]
+                        }
                     ],
                 },
                 {
@@ -70,7 +94,7 @@ export const root = make.module({
                             do: [
                                 {
                                     type: 'goto',
-                                    path: ['start'],
+                                    path: ['/start'],
                                 },
                             ],
                         },

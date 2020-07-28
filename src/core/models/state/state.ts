@@ -1,6 +1,7 @@
 import { JSONValue, PlainObject, Id } from '../common/common-types'
 import { ConvoSegmentPath } from '../convo-engine/convo-graph/convo-path'
 import { EventRecord, EventRecordId } from './event-record'
+import { Either } from 'fp-ts/lib/Either'
 
 export type StateVariable = JSONValue
 
@@ -10,6 +11,10 @@ export type StateVariable = JSONValue
  * GeneralizedState, as defined here.
  */
 export type GeneralizedState = PlainObject<StateVariable>
+
+export type GeneralizedStateInstance = Readonly<GeneralizedState>
+
+export type GeneralizedStateUpdate = Partial<GeneralizedStateInstance>
 
 export type UserIdNominalType = 'uuid'
 
@@ -27,5 +32,7 @@ export type UserHistoryState = {
     history: EventRecord[]
     revertedEvents: Set<EventRecordId>
 }
+
+export type StateDependentResult<T, S extends GeneralizedStateInstance = GeneralizedStateInstance> = (state: S) => Readonly<T>
 
 export type Stores = VariableStoreState & NavigationStoreState

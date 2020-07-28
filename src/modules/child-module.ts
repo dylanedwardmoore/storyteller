@@ -7,7 +7,7 @@ const restartChoice = make.choice({
             do: [
                 {
                     type: 'goto',
-                    path: ['root', 'start'],
+                    path: ['root', '/start'],
                 },
             ],
         },

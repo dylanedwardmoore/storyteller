@@ -14,14 +14,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.stateManagerConstructor = void 0;
+exports.stateManagerConstructor = exports.safelyGetConvoSegment = void 0;
 var Either_1 = require("fp-ts/lib/Either");
 var util_functions_1 = require("../util/util-functions");
 var logging_1 = __importDefault(require("../util/logging"));
 var function_1 = require("fp-ts/lib/function");
 var stateNavigationStoreFunctionsConstructor = function (initialUserState, historyManager) {
     var cache = {
-        currentConvoSegmentPath: initialUserState.currentConvoSegmentPath
+        currentConvoSegmentPath: initialUserState.currentConvoSegmentPath,
     };
     // Restore history to cache using history manager
     return {
@@ -33,18 +33,19 @@ var stateNavigationStoreFunctionsConstructor = function (initialUserState, histo
         getCurrentConvoSegmentPath: function () {
             logging_1.default.silly("getting current convo path, which is ", cache.currentConvoSegmentPath);
             return cache.currentConvoSegmentPath;
-        }
+        },
     };
 };
 var stateVariableStoreFunctionsConstructor = function (initialUserState, historyManager) {
     var cache = {
-        variables: initialUserState.variables
+        variables: initialUserState.variables,
     };
     // Restore history to cache using history manager
     return {
-        getStateVariable: function (key) { return cache.variables[key]; },
-        setStateVariable: function (key, newValue) {
-            cache.variables[key] = newValue;
+        getState: function () { return cache.variables; },
+        updateState: function (updates) {
+            var previousState = cache.variables;
+            cache.variables = __assign(__assign({}, previousState), updates);
         }
     };
 };
@@ -53,7 +54,7 @@ var pathWithoutRootId = function (rootId, path) {
     if (parentModules && parentModules[0] === rootId) {
         return {
             id: path.id,
-            parentModules: parentModules.slice(1)
+            parentModules: parentModules.slice(1),
         };
     }
     else {
@@ -72,21 +73,31 @@ var relativePathToAbsolute = function (possiblyRelativePath, currentAbsolutePath
         return __assign(__assign({}, possiblyRelativePath), { parentModules: parentModules });
     }
 };
-var safelyGetConvoSegment = function (rootModule, path, currentPath) {
+exports.safelyGetConvoSegment = function (rootModule, path, currentPath) {
     var unsafeRetreive = function (path) {
         var absolutePathExcludingRootId = pathWithoutRootId(rootModule.id, relativePathToAbsolute(path, currentPath));
         var reducer = function (parentModule, nextChildId) {
             return parentModule.submodules[util_functions_1.getNominalValue(nextChildId)];
         };
         var nestedModule = absolutePathExcludingRootId.parentModules.reduce(reducer, rootModule);
-        return nestedModule.convoSegments[path.id];
+        var resultOrUndefined = nestedModule.convoSegments[path.id];
+        if (resultOrUndefined === undefined) {
+            throw new Error("No convo segment with the specified id is defined");
+        }
+        else {
+            return resultOrUndefined;
+        }
     };
-    return Either_1.tryCatch(function () { return unsafeRetreive(path); }, function (e) { return (e instanceof Error ? new Error("Module path is invalid: " + path) : new Error('Unknown error while retreiving convo segment')); });
+    return Either_1.tryCatch(function () { return unsafeRetreive(path); }, function (e) {
+        return e instanceof Error
+            ? new Error("Module path is invalid: " + path)
+            : new Error('Unknown error while retreiving convo segment');
+    });
 };
 // Can cause terminal error
 var getCurrentConvoSegment = function (rootModule, navigationStoreFunctions) {
     var currentPath = navigationStoreFunctions.getCurrentConvoSegmentPath();
-    var currentConvoSegmentOrError = safelyGetConvoSegment(rootModule, currentPath, currentPath);
+    var currentConvoSegmentOrError = exports.safelyGetConvoSegment(rootModule, currentPath, currentPath);
     var errorHandling = function (error) {
         logging_1.default.trace("Unretreivable current convo segment for current convo path: ", currentPath, "Please run server with module path tests enabled to help debug this issue.");
         throw error;
@@ -96,9 +107,15 @@ var getCurrentConvoSegment = function (rootModule, navigationStoreFunctions) {
 };
 var stateNavigationFunctionsConstructor = function (rootModule, navigationStoreFunctions) {
     return {
-        safelyGetConvoSegment: function (path) { return safelyGetConvoSegment(rootModule, path, navigationStoreFunctions.getCurrentConvoSegmentPath()); },
-        getCurrentConvoSegment: function () { return getCurrentConvoSegment(rootModule, navigationStoreFunctions); },
-        getAbsolutePath: function (path) { return relativePathToAbsolute(path, navigationStoreFunctions.getCurrentConvoSegmentPath()); }
+        safelyGetConvoSegment: function (path) {
+            return exports.safelyGetConvoSegment(rootModule, path, navigationStoreFunctions.getCurrentConvoSegmentPath());
+        },
+        getCurrentConvoSegment: function () {
+            return getCurrentConvoSegment(rootModule, navigationStoreFunctions);
+        },
+        getAbsolutePath: function (path) {
+            return relativePathToAbsolute(path, navigationStoreFunctions.getCurrentConvoSegmentPath());
+        },
     };
 };
 exports.stateManagerConstructor = {
@@ -107,6 +124,6 @@ exports.stateManagerConstructor = {
         var stateVariableStoreFunctions = stateVariableStoreFunctionsConstructor(onInitState, historyManager);
         var stateNavigationFunctions = stateNavigationFunctionsConstructor(rootModule, stateNavigationStoreFunctions);
         return __assign(__assign(__assign({}, stateNavigationStoreFunctions), stateVariableStoreFunctions), stateNavigationFunctions);
-    }
+    },
 };
 //# sourceMappingURL=state-manager.js.map

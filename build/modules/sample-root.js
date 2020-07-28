@@ -9,56 +9,99 @@ var child_module_1 = require("./child-module");
 exports.root = make_1.default.module({
     id: 'root',
     submodules: [child_module_1.nestedModule],
-    convoSegments: [{
-            id: 'start',
-            convo: [{
+    convoSegments: [
+        {
+            id: '/start',
+            convo: [
+                {
                     type: 'text',
-                    text: 'this chatbot says welcome'
-                }],
+                    text: 'this chatbot says welcome',
+                },
+                {
+                    type: 'text',
+                    text: function (state) { return 'test value is ' + state.testValue; },
+                }
+            ],
             choices: [
                 {
                     text: '/start',
-                    logic: [{
-                            if: true,
-                            do: [{
+                    logic: [
+                        {
+                            do: [
+                                {
                                     type: 'goto',
-                                    path: ['root', 'sample2']
-                                }],
+                                    path: ['root', 'sample2'],
+                                },
+                            ]
+                        }
+                    ],
+                },
+                {
+                    text: 'updateCounter',
+                    logic: [
+                        {
+                            if: function (state) { return state.testValue < 3; },
+                            do: [{
+                                    type: 'update-state',
+                                    update: function (state) { return ({ testValue: state.testValue + 1 }); }
+                                }, {
+                                    type: 'goto',
+                                    path: ['root', '/start'],
+                                },],
                             otherwise: [{
+                                    type: 'update-state',
+                                    update: { testValue: 0 },
+                                },
+                                {
                                     type: 'goto',
-                                    path: ['root', 'child', 'childSegment']
+                                    path: ['root', '/start'],
                                 }]
-                        }]
-                }, {
+                        }
+                    ],
+                },
+                {
                     text: '/child',
-                    logic: [{
-                            do: [{
+                    logic: [
+                        {
+                            do: [
+                                {
                                     type: 'goto',
-                                    path: ['root', 'child', 'childSegment']
-                                }]
-                        }]
-                }
-            ]
+                                    path: ['root', 'child', 'childSegment'],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         },
         {
             id: 'sample2',
-            convo: [{
+            convo: [
+                {
                     type: 'text',
-                    text: 'oh this <b>absolute path</b> works too'
+                    text: 'oh this <b>absolute path</b> works too',
                 },
                 {
                     type: 'image',
-                    src: 'https://imaging.nikon.com/lineup/dslr/df/img/sample/img_01.jpg'
-                }],
-            choices: [{
+                    src: 'https://imaging.nikon.com/lineup/dslr/df/img/sample/img_01.jpg',
+                },
+            ],
+            choices: [
+                {
                     text: '/goBackToStart',
-                    logic: [{
-                            do: [{
+                    logic: [
+                        {
+                            do: [
+                                {
                                     type: 'goto',
-                                    path: ['start']
-                                }]
-                        }]
-                }]
-        }]
+                                    path: ['/startu'],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
 });
 //# sourceMappingURL=sample-root.js.map

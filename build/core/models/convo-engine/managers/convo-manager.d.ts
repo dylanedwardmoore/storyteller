@@ -1,6 +1,6 @@
-import RenderInChat from "../../chat-client/render-interface";
-import ConvoModule from "../convo-graph/convo-module";
-import { Stores } from "../../state/state";
+import RenderInChat from '../../chat-client/render-interface';
+import ConvoModule from '../convo-graph/convo-module';
+import { Stores } from '../../state/state';
 interface ConvoManager {
     respondToUserInput: (userId: string, userInput: string, chatRenderFunctions: RenderInChat) => void;
 }

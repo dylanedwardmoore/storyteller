@@ -1,5 +1,5 @@
-import ConvoSegment from "./convo-segment";
-import { Id } from "../../common/common-types";
+import ConvoSegment from './convo-segment';
+import { Id } from '../../common/common-types';
 export declare type ConvoModuleIdNominalType = 'convo-module-id';
 export declare type ConvoModuleId = Id<ConvoModuleIdNominalType>;
 export declare type ConvoModule = Readonly<{
