@@ -7,43 +7,59 @@ exports.nestedModule = void 0;
 var make_1 = __importDefault(require("../core/util/make"));
 var restartChoice = make_1.default.choice({
     text: '/goToStart',
-    logic: [{
-            do: [{
+    logic: [
+        {
+            do: [
+                {
                     type: 'goto',
-                    path: ['root', 'start']
-                }]
-        }]
+                    path: ['root', '/start'],
+                },
+            ],
+        },
+    ],
 });
 exports.nestedModule = make_1.default.module({
     id: 'child',
     submodules: [],
-    convoSegments: [{
+    convoSegments: [
+        {
             id: 'childSegment',
-            convo: [{
+            convo: [
+                {
                     type: 'text',
-                    text: 'this is a child convo segment'
-                }, {
+                    text: 'this is a child convo segment',
+                },
+                {
                     type: 'text',
-                    text: 'it has two parts'
-                }],
+                    text: 'it has two parts',
+                },
+            ],
             choices: [
                 {
                     text: '/relativeChild',
-                    logic: [{
-                            do: [{
+                    logic: [
+                        {
+                            do: [
+                                {
                                     type: 'goto',
-                                    path: ['otherChildSegement']
-                                }]
-                        }]
-                }
-            ]
-        }, {
+                                    path: ['otherChildSegement'],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        {
             id: 'otherChildSegement',
-            convo: [{
+            convo: [
+                {
                     type: 'text',
-                    text: 'this is the other child node'
-                }],
-            choices: [restartChoice]
-        }]
+                    text: 'this is the other child node',
+                },
+            ],
+            choices: [restartChoice],
+        },
+    ],
 });
 //# sourceMappingURL=child-module.js.map

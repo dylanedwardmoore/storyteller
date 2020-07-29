@@ -1,6 +1,5 @@
-import ConvoSegment from "./convo-segment";
-import { IdCollection, Id, Nominal } from "../../common/common-types";
-
+import ConvoSegment from './convo-segment'
+import { IdCollection, Id, Nominal } from '../../common/common-types'
 
 export type ConvoModuleIdNominalType = 'convo-module-id'
 

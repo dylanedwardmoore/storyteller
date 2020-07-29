@@ -25,8 +25,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var dotenv = __importStar(require("dotenv"));
 var telegram_chat_client_1 = require("./core/chat-client/telegram-chat-client");
 var logging_1 = __importDefault(require("./core/util/logging"));
-var sample_root_1 = require("./modules/sample-root");
 var convo_manager_1 = require("./core/convo-engine/convo-manager");
+var storyteller_config_1 = __importDefault(require("./storyteller-config"));
 dotenv.config();
 var apiKey = process.env.BOT_TOKEN;
 if (apiKey === undefined) {
@@ -36,5 +36,5 @@ if (apiKey === undefined) {
 }
 var client = telegram_chat_client_1.telegramClient(apiKey);
 logging_1.default.debug("Initialized telegram client, attempting to run modules");
-client.runModule(sample_root_1.sampleModuleData, convo_manager_1.convoManagerConstructor);
+client.runModule(storyteller_config_1.default, convo_manager_1.convoManagerConstructor);
 //# sourceMappingURL=index.js.map

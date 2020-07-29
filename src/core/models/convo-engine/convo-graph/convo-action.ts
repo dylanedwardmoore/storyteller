@@ -1,5 +1,4 @@
-import { ConvoSegmentPath } from "./convo-path"
-
+import { ConvoSegmentPath } from './convo-path'
 
 export type StartConvoSegment = {
     type: 'start-convo-segment'

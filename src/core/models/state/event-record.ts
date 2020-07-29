@@ -1,6 +1,4 @@
-import { Id } from "../common/common-types"
-
-
+import { Id } from '../common/common-types'
 
 export type EventRecordIdNominalType = 'event-record-id'
 

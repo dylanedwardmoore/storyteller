@@ -1,4 +1,4 @@
-import { UserId } from "../state";
+import { UserId } from '../state';
 interface StorageManager {
     readAllDataEntries: (userId: UserId) => string[];
     appendDataEntry: (userId: UserId, dataEntry: string) => void;

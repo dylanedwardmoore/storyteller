@@ -1,7 +1,6 @@
-import { ConvoSegmentId } from "./convo-segment"
-import { ConvoModuleId } from "./convo-module"
-import { Nominal } from "../../common/common-types"
-
+import { ConvoSegmentId } from './convo-segment'
+import { ConvoModuleId } from './convo-module'
+import { Nominal } from '../../common/common-types'
 
 export type ModulePath = ConvoModuleId[]
 

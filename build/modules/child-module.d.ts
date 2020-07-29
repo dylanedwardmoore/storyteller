@@ -5,9 +5,10 @@ export declare const nestedModule: Readonly<{
         id: import("../core/models/common/common-types").Nominal<"convo-segment-id", string>;
         convoNodes: import("../core/models/convo-engine/convo-graph/convo-node").default[];
         choices: Readonly<{
-            text: any;
+            text: import("../core/models/convo-engine/convo-graph/expression").Expression<"text-expression", string>;
             logic: import("../core/models/convo-engine/convo-graph/convo-logic").ConvoLogic;
         }>[];
+        defaultChoice?: import("../core/models/convo-engine/convo-graph/convo-logic").ConvoLogic | undefined;
         preLogic: import("../core/models/convo-engine/convo-graph/convo-logic").ConvoLogic;
         postLogic: import("../core/models/convo-engine/convo-graph/convo-logic").ConvoLogic;
     }>>;

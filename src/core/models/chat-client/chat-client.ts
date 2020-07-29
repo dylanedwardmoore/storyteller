@@ -1,23 +1,21 @@
-import { ConvoManagerConstructor } from "../convo-engine/managers/convo-manager"
-import ConvoModule from "../convo-engine/convo-graph/convo-module"
-import { InitialUserState } from "../state/state"
-
+import { ConvoManagerConstructor } from '../convo-engine/managers/convo-manager'
+import ConvoModule from '../convo-engine/convo-graph/convo-module'
+import { GeneralizedState } from '../state/state'
+import { AbsoluteConvoSegmentPath } from '../convo-engine/convo-graph/convo-path'
 
 type APIKey = string
 
-export type ChatCommand = string
-
-export type ModuleConfig = {
-    initialState: InitialUserState
-}
-
-export type ModuleData = {
-    module: ConvoModule
-    moduleConfig: ModuleConfig
+export type StorytellerConfig = {
+    rootModule: ConvoModule
+    initialState: GeneralizedState
+    startingConvoSegmentPath: AbsoluteConvoSegmentPath
 }
 
 export interface ChatClient {
-    runModule: (module: ModuleData, convoManagerConstructor: ConvoManagerConstructor) => void
+    runModule: (
+        config: StorytellerConfig,
+        convoManagerConstructor: ConvoManagerConstructor
+    ) => void
 }
 
 export type ChatClientConstructor = (key: APIKey) => ChatClient

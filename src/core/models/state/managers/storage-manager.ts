@@ -1,6 +1,5 @@
-import { EventRecord } from "../event-record";
-import { UserId } from "../state";
-
+import { EventRecord } from '../event-record'
+import { UserId } from '../state'
 
 interface StorageManager {
     readAllDataEntries: (userId: UserId) => string[]
@@ -8,4 +7,4 @@ interface StorageManager {
     deleteAllDataEntries: (userId: UserId) => void
 }
 
-export default StorageManager 
+export default StorageManager

@@ -27,15 +27,23 @@ function renderWithContext(ctx) {
         replyImage: function (src, buttons) {
             logging_1.default.debug('reply in chat with the image: ', src);
             ctx.replyWithPhoto({ url: "" + src }, getKeyboardWithButtons(buttons).draw());
-        }
+        },
     };
 }
 exports.telegramClient = function (apiKey) {
     var bot = new Telegraf(apiKey);
     return {
-        runModule: function (moduleData, convoManagerConstructor) {
+        runModule: function (storytellerConfig, convoManagerConstructor) {
             bot.use(session());
-            var convoManager = convoManagerConstructor(moduleData.module, moduleData.moduleConfig.initialState);
+            var initialState = {
+                lastTextMessage: "",
+                variables: storytellerConfig.initialState
+            };
+            var initStateStores = {
+                variables: initialState,
+                currentConvoSegmentPath: storytellerConfig.startingConvoSegmentPath,
+            };
+            var convoManager = convoManagerConstructor(storytellerConfig.rootModule, initStateStores);
             bot.on('text', function (ctx) {
                 logging_1.default.debug("received user input");
                 var renderFunctions = renderWithContext(ctx);
@@ -47,7 +55,7 @@ exports.telegramClient = function (apiKey) {
             });
             logging_1.default.debug("telegram client is configured and waiting for messages.");
             bot.launch();
-        }
+        },
     };
 };
 //# sourceMappingURL=telegram-chat-client.js.map
