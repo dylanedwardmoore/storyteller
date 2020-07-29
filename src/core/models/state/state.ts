@@ -1,9 +1,14 @@
 import { JSONValue, PlainObject, Id } from '../common/common-types'
 import { ConvoSegmentPath } from '../convo-engine/convo-graph/convo-path'
 import { EventRecord, EventRecordId } from './event-record'
-import { Either } from 'fp-ts/lib/Either'
+
 
 export type StateVariable = JSONValue
+
+// TODO: refactor this to make user info more separate from state?
+export type UserInfo = {
+    lastTextMessage: string
+}
 
 /*
  * To make the core agnostic from content,
@@ -25,7 +30,7 @@ export type NavigationStoreState = {
 }
 
 export type VariableStoreState = {
-    variables: GeneralizedState
+    variables: GeneralizedState & UserInfo
 }
 
 export type UserHistoryState = {
@@ -33,6 +38,9 @@ export type UserHistoryState = {
     revertedEvents: Set<EventRecordId>
 }
 
-export type StateDependentResult<T, S extends GeneralizedStateInstance = GeneralizedStateInstance> = (state: S) => Readonly<T>
+export type StateDependentResult<
+    T,
+    S extends GeneralizedStateInstance = GeneralizedStateInstance
+> = (state: S) => Readonly<T>
 
 export type Stores = VariableStoreState & NavigationStoreState

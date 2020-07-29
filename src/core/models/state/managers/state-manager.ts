@@ -1,4 +1,11 @@
-import { UserId, StateVariable, Stores, GeneralizedState, GeneralizedStateUpdate, GeneralizedStateInstance } from '../state'
+import {
+    UserId,
+    StateVariable,
+    Stores,
+    GeneralizedState,
+    GeneralizedStateUpdate,
+    GeneralizedStateInstance,
+} from '../state'
 import {
     ConvoSegmentPath,
     AbsoluteConvoSegmentPath,

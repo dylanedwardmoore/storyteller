@@ -107,6 +107,8 @@ exports.convoManagerConstructor = function (module, initialState) {
             });
             // Find the matching user choice for the given user input at the current convoNode
             logging_1.default.debug("processing user input " + userInput + " for convo segment with path ", stateManager.getCurrentConvoSegmentPath);
+            logging_1.default.debug("updating lastTextMessage state field");
+            stateManager.updateState({ lastTextMessage: userInput });
             var currentConvoSegment = stateManager.getCurrentConvoSegment();
             var selectedUserChoice = currentConvoSegment.choices.find(choiceMatchesUserInput(userInput, stateManager.getState()));
             if (selectedUserChoice !== undefined) {
@@ -119,10 +121,20 @@ exports.convoManagerConstructor = function (module, initialState) {
                 });
             }
             else {
-                logging_1.default.debug("User input " + userInput + " matches NO choices");
-                var keyboardButtons = keyboardButtonsFromChoices(stateManager.getState(), currentConvoSegment.choices);
-                var defaultResponse = "Sorry, I don't recognize your response of <i>" + userInput + "</i> right now. Try responding with one of the buttons in the chat keyboard.";
-                chatRenderFunctions.replyText(defaultResponse, keyboardButtons);
+                if (currentConvoSegment.defaultChoice !== undefined) {
+                    logging_1.default.debug("User input matches no choices, executing logic for default choice");
+                    executeConvoLogic({
+                        logic: currentConvoSegment.defaultChoice,
+                        stateManager: stateManager,
+                        chatRenderFunctions: chatRenderFunctions,
+                    });
+                }
+                else {
+                    logging_1.default.debug("User input " + userInput + " matches NO choices and no 'defaultChoice' is defined");
+                    var keyboardButtons = keyboardButtonsFromChoices(stateManager.getState(), currentConvoSegment.choices);
+                    var defaultResponse = "Sorry, I don't recognize your response of <i>" + userInput + "</i> right now. Try responding with one of the buttons in the chat keyboard.";
+                    chatRenderFunctions.replyText(defaultResponse, keyboardButtons);
+                }
             }
         },
     };

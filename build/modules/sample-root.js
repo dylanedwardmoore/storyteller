@@ -20,7 +20,7 @@ exports.root = make_1.default.module({
                 {
                     type: 'text',
                     text: function (state) { return 'test value is ' + state.testValue; },
-                }
+                },
             ],
             choices: [
                 {
@@ -32,8 +32,8 @@ exports.root = make_1.default.module({
                                     type: 'goto',
                                     path: ['root', 'sample2'],
                                 },
-                            ]
-                        }
+                            ],
+                        },
                     ],
                 },
                 {
@@ -41,22 +41,29 @@ exports.root = make_1.default.module({
                     logic: [
                         {
                             if: function (state) { return state.testValue < 3; },
-                            do: [{
+                            do: [
+                                {
                                     type: 'update-state',
-                                    update: function (state) { return ({ testValue: state.testValue + 1 }); }
-                                }, {
+                                    update: function (state) { return ({
+                                        testValue: state.testValue + 1,
+                                    }); },
+                                },
+                                {
                                     type: 'goto',
                                     path: ['root', '/start'],
-                                },],
-                            otherwise: [{
+                                },
+                            ],
+                            otherwise: [
+                                {
                                     type: 'update-state',
                                     update: { testValue: 0 },
                                 },
                                 {
                                     type: 'goto',
                                     path: ['root', '/start'],
-                                }]
-                        }
+                                },
+                            ],
+                        },
                     ],
                 },
                 {
@@ -73,6 +80,43 @@ exports.root = make_1.default.module({
                     ],
                 },
             ],
+            default: [{
+                    if: function (state) { return state.lastTextMessage.length > 10; },
+                    do: [
+                        {
+                            type: 'goto',
+                            path: ['longMessage']
+                        }
+                    ],
+                    otherwise: [
+                        {
+                            type: 'goto',
+                            path: ['/start']
+                        }
+                    ]
+                }]
+        },
+        {
+            id: 'longMessage',
+            convo: [
+                {
+                    type: 'text',
+                    text: function (state) { return state.lastTextMessage + " is a long message!"; }
+                }
+            ],
+            choices: [
+                {
+                    text: 'yep',
+                    logic: [
+                        {
+                            do: [{
+                                    type: 'goto',
+                                    path: ['/start']
+                                }]
+                        }
+                    ]
+                }
+            ]
         },
         {
             id: 'sample2',
@@ -94,7 +138,7 @@ exports.root = make_1.default.module({
                             do: [
                                 {
                                     type: 'goto',
-                                    path: ['/startu'],
+                                    path: ['/start'],
                                 },
                             ],
                         },

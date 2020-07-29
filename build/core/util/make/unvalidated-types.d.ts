@@ -40,6 +40,7 @@ export declare type _ConvoSegment = {
     id: _ConvoSegmentId;
     convo: _ConvoNode[];
     choices: _Choice[];
+    default?: _Logic[];
 };
 export declare type _ConvoModule = {
     id: _ModuleId;

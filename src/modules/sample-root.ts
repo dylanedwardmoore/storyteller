@@ -17,7 +17,7 @@ export const root = make.module({
                 {
                     type: 'text',
                     text: state => 'test value is ' + state.testValue,
-                }
+                },
             ],
             choices: [
                 {
@@ -27,10 +27,10 @@ export const root = make.module({
                             do: [
                                 {
                                     type: 'goto',
-                                    path: ['root', 'sample2'], 
+                                    path: ['root', 'sample2'],
                                 },
-                            ]
-                        }
+                            ],
+                        },
                     ],
                 },
                 {
@@ -38,24 +38,29 @@ export const root = make.module({
                     logic: [
                         {
                             if: state => state.testValue < 3,
-                            do: [{
-                                type: 'update-state',
-                                update: state => ({ testValue: state.testValue + 1 })
-                            },
-                            {
-                                type: 'goto',
-                                path: ['root', '/start'],
-                            },
+                            do: [
+                                {
+                                    type: 'update-state',
+                                    update: state => ({
+                                        testValue: state.testValue + 1,
+                                    }),
+                                },
+                                {
+                                    type: 'goto',
+                                    path: ['root', '/start'],
+                                },
                             ],
-                            otherwise: [{
-                                type: 'update-state',
-                                update: { testValue: 0 },
-                            },
-                            {
-                                type: 'goto',
-                                path: ['root', '/start'],
-                            }]
-                        }
+                            otherwise: [
+                                {
+                                    type: 'update-state',
+                                    update: { testValue: 0 },
+                                },
+                                {
+                                    type: 'goto',
+                                    path: ['root', '/start'],
+                                },
+                            ],
+                        },
                     ],
                 },
                 {
@@ -72,6 +77,43 @@ export const root = make.module({
                     ],
                 },
             ],
+            default: [{
+                if: state => state.lastTextMessage.length > 20,
+                do: [
+                    {
+                        type: 'goto',
+                        path: ['longMessage']
+                    }
+                ],
+                otherwise: [
+                    {
+                        type: 'goto',
+                        path: ['/start']
+                    }
+                ]
+            }]
+        },
+        {
+            id: 'longMessage',
+            convo: [
+                {
+                    type: 'text',
+                    text: state => `<b>${state.lastTextMessage}</b> is a long message!`
+                }
+            ],
+            choices: [
+                {
+                    text: 'yep',
+                    logic: [
+                        {
+                            do: [{
+                                type: 'goto',
+                                path: ['/start']
+                            }]
+                        }
+                    ]
+                }
+            ]
         },
         {
             id: 'sample2',

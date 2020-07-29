@@ -8,7 +8,6 @@ import ConvoModule from '../../models/convo-engine/convo-graph/convo-module'
 import { StateDependentResult } from '../../models/state/state'
 import { State } from '../../../state/state-config'
 
-
 // TODO: investigate if this reference to config needs to be here...
 export type ResultOrStateDependentResult<T> = T | StateDependentResult<T, State>
 
@@ -65,6 +64,7 @@ export type _ConvoSegment = {
     id: _ConvoSegmentId
     convo: _ConvoNode[]
     choices: _Choice[]
+    default?: _Logic[]
 }
 
 export type _ConvoModule = {

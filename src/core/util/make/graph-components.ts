@@ -19,7 +19,7 @@ import {
     ResultOrStateDependentResult,
     _Action,
     _UpdateStateAction,
-    _StateUpdate
+    _StateUpdate,
 } from './unvalidated-types'
 import ConvoSegment, {
     ConvoSegmentId,
@@ -27,8 +27,7 @@ import ConvoSegment, {
 import UserChoice from '../../models/convo-engine/convo-graph/user-choice'
 import ConvoNode from '../../models/convo-engine/convo-graph/convo-node'
 import ImageNode from '../../models/convo-engine/convo-graph/image-node'
-import TextNode, {
-} from '../../models/convo-engine/convo-graph/text-node'
+import TextNode from '../../models/convo-engine/convo-graph/text-node'
 import {
     Text,
     Filepath,
@@ -43,7 +42,10 @@ import {
     ConvoSegmentPath,
     AbsoluteConvoSegmentPath,
 } from '../../models/convo-engine/convo-graph/convo-path'
-import { StateDependentResult, GeneralizedState } from '../../models/state/state'
+import {
+    StateDependentResult,
+    GeneralizedState,
+} from '../../models/state/state'
 import { JSONValue } from '../../models/common/common-types'
 import { trace } from 'console'
 
@@ -98,7 +100,7 @@ function startConvoAction(content: _StartConvoAction): ConvoLogicAction {
 function updateStateAction(content: _UpdateStateAction): ConvoLogicAction {
     return {
         type: 'update-state-data-action',
-        updates: stateUpdate(content.update)
+        updates: stateUpdate(content.update),
     }
 }
 
@@ -110,19 +112,25 @@ function logicActions(content: _Action[]): ConvoLogicAction[] {
             case 'update-state':
                 return updateStateAction(unvalidated)
             default:
-                throw new Error('Unreachable code: this switch-case statement should be exaustive')
+                throw new Error(
+                    'Unreachable code: this switch-case statement should be exaustive'
+                )
         }
     })
 }
 
-function wrapAsStateDependentExpression<T extends JSONValue>(resultOrStateDependentResult: ResultOrStateDependentResult<T>): 
-    { stateDependentResult: StateDependentResult<T> } {
-
-    const wrap = (inner: StateDependentResult<T>) => ({ stateDependentResult: inner })
+function wrapAsStateDependentExpression<T extends JSONValue>(
+    resultOrStateDependentResult: ResultOrStateDependentResult<T>
+): { stateDependentResult: StateDependentResult<T> } {
+    const wrap = (inner: StateDependentResult<T>) => ({
+        stateDependentResult: inner,
+    })
     if (typeof resultOrStateDependentResult === 'function') {
         return wrap(resultOrStateDependentResult as StateDependentResult<T>)
     } else {
-        return wrap((state => resultOrStateDependentResult) as StateDependentResult<T>)
+        return wrap(
+            (state => resultOrStateDependentResult) as StateDependentResult<T>
+        )
     }
 }
 
@@ -147,14 +155,14 @@ function convoLogic(content: _Logic[]): ConvoLogic {
                 otherwise: unvalidated.otherwise
                     ? logicActions(unvalidated.otherwise)
                     : [],
-                _compiledWithoutConditional: false
+                _compiledWithoutConditional: false,
             }
         } else {
             return {
                 if: conditional(true),
                 do: logicActions(unvalidated.do),
                 otherwise: logicActions(unvalidated.do),
-                _compiledWithoutConditional: true
+                _compiledWithoutConditional: true,
             }
         }
     })
@@ -205,6 +213,7 @@ function convoSegment(content: _ConvoSegment): ConvoSegment {
         convoNodes: content.convo.map(unvalidated => convoNode(unvalidated)),
         preLogic: [],
         postLogic: [],
+        defaultChoice: content.default === undefined ? [] : convoLogic(content.default)
     }
 }
 

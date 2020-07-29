@@ -55,7 +55,7 @@ function startConvoAction(content) {
 function updateStateAction(content) {
     return {
         type: 'update-state-data-action',
-        updates: stateUpdate(content.update)
+        updates: stateUpdate(content.update),
     };
 }
 function logicActions(content) {
@@ -71,7 +71,9 @@ function logicActions(content) {
     });
 }
 function wrapAsStateDependentExpression(resultOrStateDependentResult) {
-    var wrap = function (inner) { return ({ stateDependentResult: inner }); };
+    var wrap = function (inner) { return ({
+        stateDependentResult: inner,
+    }); };
     if (typeof resultOrStateDependentResult === 'function') {
         return wrap(resultOrStateDependentResult);
     }
@@ -97,7 +99,7 @@ function convoLogic(content) {
                 otherwise: unvalidated.otherwise
                     ? logicActions(unvalidated.otherwise)
                     : [],
-                _compiledAsDo: false
+                _compiledWithoutConditional: false,
             };
         }
         else {
@@ -105,7 +107,7 @@ function convoLogic(content) {
                 if: conditional(true),
                 do: logicActions(unvalidated.do),
                 otherwise: logicActions(unvalidated.do),
-                _compiledAsDo: true
+                _compiledWithoutConditional: true,
             };
         }
     });
@@ -148,6 +150,7 @@ function convoSegment(content) {
         convoNodes: content.convo.map(function (unvalidated) { return convoNode(unvalidated); }),
         preLogic: [],
         postLogic: [],
+        defaultChoice: content.default === undefined ? [] : convoLogic(content.default)
     };
 }
 function module(content) {

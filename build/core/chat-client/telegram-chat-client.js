@@ -35,8 +35,12 @@ exports.telegramClient = function (apiKey) {
     return {
         runModule: function (storytellerConfig, convoManagerConstructor) {
             bot.use(session());
+            var initialState = {
+                lastTextMessage: "",
+                variables: storytellerConfig.initialState
+            };
             var initStateStores = {
-                variables: storytellerConfig.initialState,
+                variables: initialState,
                 currentConvoSegmentPath: storytellerConfig.startingConvoSegmentPath,
             };
             var convoManager = convoManagerConstructor(storytellerConfig.rootModule, initStateStores);

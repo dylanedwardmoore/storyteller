@@ -46,7 +46,7 @@ var stateVariableStoreFunctionsConstructor = function (initialUserState, history
         updateState: function (updates) {
             var previousState = cache.variables;
             cache.variables = __assign(__assign({}, previousState), updates);
-        }
+        },
     };
 };
 var pathWithoutRootId = function (rootId, path) {

@@ -66,9 +66,9 @@ const stateVariableStoreFunctionsConstructor: (
             const previousState = cache.variables
             cache.variables = {
                 ...previousState,
-                ...updates
+                ...updates,
             }
-        }
+        },
     }
 }
 

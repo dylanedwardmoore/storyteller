@@ -9,9 +9,11 @@ import {
 } from '../models/convo-engine/convo-graph/expression'
 import { fold, Either } from 'fp-ts/lib/Either'
 import log from './logging'
-import { GeneralizedStateInstance, GeneralizedStateUpdate } from '../models/state/state'
+import {
+    GeneralizedStateInstance,
+    GeneralizedStateUpdate,
+} from '../models/state/state'
 import { tryCatch } from 'fp-ts/lib/Either'
-
 
 export function getNominalValue<K, T>(nominal: Nominal<K, T>): T {
     return nominal
@@ -35,12 +37,16 @@ export function noDuplicates<T>(arr: T[]): T[] {
     return Array.from(new Set(arr))
 }
 
-function evaluateExpression<K, T extends Readonly<boolean | string | number | GeneralizedStateUpdate>>(
+function evaluateExpression<
+    K,
+    T extends Readonly<boolean | string | number | GeneralizedStateUpdate>
+>(
     expression: Expression<K, T>,
     onError: ErrorHandler<T>,
     stateInstance: GeneralizedStateInstance
 ): T {
-    const generalErrorHandling = (e: any) => (e instanceof Error ? e : new Error('unknown error'))
+    const generalErrorHandling = (e: any) =>
+        e instanceof Error ? e : new Error('unknown error')
     const resultOrError: Either<Error, Readonly<T>> = tryCatch(() => {
         const test = expression.stateDependentResult(stateInstance)
         return expression.stateDependentResult(stateInstance)

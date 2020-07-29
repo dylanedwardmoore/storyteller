@@ -3,6 +3,7 @@ import ConvoManager from '../models/convo-engine/managers/convo-manager'
 import RenderInChat from '../models/chat-client/render-interface'
 import log from '../util/logging'
 import { Stores } from '../models/state/state'
+import { State } from '../../state/state-config'
 const Keyboard = require('telegraf-keyboard')
 const Telegraf = require('telegraf')
 const session = require('telegraf/session')
@@ -44,7 +45,7 @@ export const telegramClient: ChatClientConstructor = apiKey => {
             bot.use(session())
 
             const initStateStores: Stores = {
-                variables: storytellerConfig.initialState,
+                variables: storytellerConfig.initialState as State,
                 currentConvoSegmentPath:
                     storytellerConfig.startingConvoSegmentPath,
             }

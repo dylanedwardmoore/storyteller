@@ -6,6 +6,6 @@ export declare type ConditionalConvoLogic = Readonly<{
     if: Condition;
     do: ConvoLogicAction[];
     otherwise: ConvoLogicAction[];
-    _compiledAsDo: boolean;
+    _compiledWithoutConditional: boolean;
 }>;
 export declare type ConvoLogic = ConditionalConvoLogic[];

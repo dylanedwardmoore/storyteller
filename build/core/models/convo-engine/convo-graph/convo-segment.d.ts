@@ -8,6 +8,7 @@ declare type ConvoSegment = Readonly<{
     id: ConvoSegmentId;
     convoNodes: ConvoNode[];
     choices: UserChoice[];
+    defaultChoice?: ConvoLogic;
     preLogic: ConvoLogic;
     postLogic: ConvoLogic;
 }>;

@@ -34,7 +34,9 @@ function noDuplicates(arr) {
 }
 exports.noDuplicates = noDuplicates;
 function evaluateExpression(expression, onError, stateInstance) {
-    var generalErrorHandling = function (e) { return (e instanceof Error ? e : new Error('unknown error')); };
+    var generalErrorHandling = function (e) {
+        return e instanceof Error ? e : new Error('unknown error');
+    };
     var resultOrError = Either_2.tryCatch(function () {
         var test = expression.stateDependentResult(stateInstance);
         return expression.stateDependentResult(stateInstance);
