@@ -150,7 +150,7 @@ function convoSegment(content) {
         convoNodes: content.convo.map(function (unvalidated) { return convoNode(unvalidated); }),
         preLogic: [],
         postLogic: [],
-        defaultChoice: content.default === undefined ? [] : convoLogic(content.default)
+        defaultChoice: content.default === undefined ? undefined : convoLogic(content.default),
     };
 }
 function module(content) {

@@ -80,43 +80,49 @@ exports.root = make_1.default.module({
                     ],
                 },
             ],
-            default: [{
-                    if: function (state) { return state.lastTextMessage.length > 10; },
+            default: [
+                {
+                    if: function (state) { return state.lastTextMessage.length > 20; },
                     do: [
                         {
                             type: 'goto',
-                            path: ['longMessage']
-                        }
+                            path: ['longMessage'],
+                        },
                     ],
                     otherwise: [
                         {
                             type: 'goto',
-                            path: ['/start']
-                        }
-                    ]
-                }]
+                            path: ['/start'],
+                        },
+                    ],
+                },
+            ],
         },
         {
             id: 'longMessage',
             convo: [
                 {
                     type: 'text',
-                    text: function (state) { return state.lastTextMessage + " is a long message!"; }
-                }
+                    text: function (state) {
+                        return "<b>" + state.lastTextMessage + "</b> is a long message!";
+                    },
+                },
             ],
             choices: [
                 {
                     text: 'yep',
                     logic: [
                         {
-                            do: [{
+                            do: [
+                                {
                                     type: 'goto',
-                                    path: ['/start']
-                                }]
-                        }
-                    ]
-                }
-            ]
+                                    path: ['/start'],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         },
         {
             id: 'sample2',

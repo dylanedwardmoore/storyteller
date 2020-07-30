@@ -1,4 +1,4 @@
-import { UserInfo } from "../core/models/state/state"
+import { UserInfo } from '../core/models/state/state'
 
 /*
  * Define your state type and initial user state here. This type and const
@@ -6,13 +6,14 @@ import { UserInfo } from "../core/models/state/state"
  *
  */
 
-export type State = UserInfo & Required<{
-    // Add custom state fields here
+export type State = UserInfo &
+    Required<{
+        // Add custom state fields here
 
-    testValue: number
-}>
+        testValue: number
+    }>
 
 export const initialState: State = {
-    lastTextMessage: "",
+    lastTextMessage: '',
     testValue: 0,
 }

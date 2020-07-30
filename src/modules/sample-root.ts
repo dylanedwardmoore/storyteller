@@ -77,43 +77,48 @@ export const root = make.module({
                     ],
                 },
             ],
-            default: [{
-                if: state => state.lastTextMessage.length > 20,
-                do: [
-                    {
-                        type: 'goto',
-                        path: ['longMessage']
-                    }
-                ],
-                otherwise: [
-                    {
-                        type: 'goto',
-                        path: ['/start']
-                    }
-                ]
-            }]
+            default: [
+                {
+                    if: state => state.lastTextMessage.length > 20,
+                    do: [
+                        {
+                            type: 'goto',
+                            path: ['longMessage'],
+                        },
+                    ],
+                    otherwise: [
+                        {
+                            type: 'goto',
+                            path: ['/start'],
+                        },
+                    ],
+                },
+            ],
         },
         {
             id: 'longMessage',
             convo: [
                 {
                     type: 'text',
-                    text: state => `<b>${state.lastTextMessage}</b> is a long message!`
-                }
+                    text: state =>
+                        `<b>${state.lastTextMessage}</b> is a long message!`,
+                },
             ],
             choices: [
                 {
                     text: 'yep',
                     logic: [
                         {
-                            do: [{
-                                type: 'goto',
-                                path: ['/start']
-                            }]
-                        }
-                    ]
-                }
-            ]
+                            do: [
+                                {
+                                    type: 'goto',
+                                    path: ['/start'],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         },
         {
             id: 'sample2',

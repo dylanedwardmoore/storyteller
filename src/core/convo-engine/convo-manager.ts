@@ -226,7 +226,7 @@ export const convoManagerConstructor: ConvoManagerConstructor = (
                 stateManager.getCurrentConvoSegmentPath
             )
             log.debug(`updating lastTextMessage state field`)
-            stateManager.updateState({lastTextMessage: userInput})
+            stateManager.updateState({ lastTextMessage: userInput })
 
             const currentConvoSegment = stateManager.getCurrentConvoSegment()
             const selectedUserChoice = currentConvoSegment.choices.find(
@@ -244,22 +244,24 @@ export const convoManagerConstructor: ConvoManagerConstructor = (
                     chatRenderFunctions,
                 })
             } else {
-                // if (currentConvoSegment.defaultChoice !== undefined) {
-                //     log.debug(`User input matches no choices, executing logic for default choice`)
-                //     executeConvoLogic({
-                //         logic: currentConvoSegment.defaultChoice,
-                //         stateManager,
-                //         chatRenderFunctions,
-                //     })
-                // } else {
-                    log.debug(`User input ${userInput} matches NO choices and no 'defaultChoice' is defined`)
+                if (currentConvoSegment.defaultChoice !== undefined) {
+                    log.debug(`User input matches no choices, executing logic for default choice`)
+                    executeConvoLogic({
+                        logic: currentConvoSegment.defaultChoice,
+                        stateManager,
+                        chatRenderFunctions,
+                    })
+                } else {
+                    log.debug(
+                        `User input ${userInput} matches NO choices and no 'defaultChoice' is defined`
+                    )
                     const keyboardButtons = keyboardButtonsFromChoices(
                         stateManager.getState(),
                         currentConvoSegment.choices
                     )
                     const defaultResponse = `Sorry, I don't recognize your response of <i>${userInput}</i> right now. Try responding with one of the buttons in the chat keyboard.`
                     chatRenderFunctions.replyText(defaultResponse, keyboardButtons)
-                // }
+                }
             }
         },
     }

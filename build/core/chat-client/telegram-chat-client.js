@@ -26,7 +26,7 @@ function renderWithContext(ctx) {
         },
         replyImage: function (src, buttons) {
             logging_1.default.debug('reply in chat with the image: ', src);
-            ctx.replyWithPhoto({ url: "" + src }, getKeyboardWithButtons(buttons).draw());
+            ctx.replyWithPhoto({ url: "" + src, filename: "photo.jpg" }, getKeyboardWithButtons(buttons).draw());
         },
     };
 }
@@ -35,12 +35,8 @@ exports.telegramClient = function (apiKey) {
     return {
         runModule: function (storytellerConfig, convoManagerConstructor) {
             bot.use(session());
-            var initialState = {
-                lastTextMessage: "",
-                variables: storytellerConfig.initialState
-            };
             var initStateStores = {
-                variables: initialState,
+                variables: storytellerConfig.initialState,
                 currentConvoSegmentPath: storytellerConfig.startingConvoSegmentPath,
             };
             var convoManager = convoManagerConstructor(storytellerConfig.rootModule, initStateStores);
