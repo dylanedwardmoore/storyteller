@@ -245,7 +245,9 @@ export const convoManagerConstructor: ConvoManagerConstructor = (
                 })
             } else {
                 if (currentConvoSegment.defaultChoice !== undefined) {
-                    log.debug(`User input matches no choices, executing logic for default choice`)
+                    log.debug(
+                        `User input matches no choices, executing logic for default choice`
+                    )
                     executeConvoLogic({
                         logic: currentConvoSegment.defaultChoice,
                         stateManager,
@@ -260,7 +262,10 @@ export const convoManagerConstructor: ConvoManagerConstructor = (
                         currentConvoSegment.choices
                     )
                     const defaultResponse = `Sorry, I don't recognize your response of <i>${userInput}</i> right now. Try responding with one of the buttons in the chat keyboard.`
-                    chatRenderFunctions.replyText(defaultResponse, keyboardButtons)
+                    chatRenderFunctions.replyText(
+                        defaultResponse,
+                        keyboardButtons
+                    )
                 }
             }
         },

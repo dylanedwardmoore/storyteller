@@ -48,7 +48,6 @@ import {
 } from '../../models/state/state'
 import { JSONValue } from '../../models/common/common-types'
 
-
 function convoModuleId(unvalidatedId: _ModuleId): ConvoModuleId {
     return unvalidatedId as ConvoModuleId
 }
@@ -213,7 +212,10 @@ function convoSegment(content: _ConvoSegment): ConvoSegment {
         convoNodes: content.convo.map(unvalidated => convoNode(unvalidated)),
         preLogic: [],
         postLogic: [],
-        defaultChoice: content.default === undefined ? undefined : convoLogic(content.default),
+        defaultChoice:
+            content.default === undefined
+                ? undefined
+                : convoLogic(content.default),
     }
 }
 
