@@ -12,7 +12,7 @@ export const root = make.module({
             convo: [
                 {
                     type: 'text',
-                    text: 'this chatbot says welcome',
+                    text: state => `this chatbot says welcome ${state.userId}`,
                 },
                 {
                     type: 'text',

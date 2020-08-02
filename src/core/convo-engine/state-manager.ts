@@ -63,10 +63,16 @@ const stateVariableStoreFunctionsConstructor: (
     return {
         getState: () => cache.variables,
         updateState: updates => {
-            const previousState = cache.variables
+            const { userId, ...previousState } = cache.variables
+
+            // userId can never be updated by convo logic.
+            // Note that it is also not advisable to modify lastUserMessage from convo logic, 
+            // even though that field is not as strongly protected.
+
             cache.variables = {
                 ...previousState,
                 ...updates,
+                userId
             }
         },
     }
@@ -194,7 +200,7 @@ const stateNavigationFunctionsConstructor: (
 }
 
 export const stateManagerConstructor: StateManagerConstructor = {
-    getOrInitUserState: (rootModule, onInitState, historyManager) => {
+    getOrInitStateManager: (rootModule, onInitState, historyManager) => {
         const stateNavigationStoreFunctions = stateNavigationStoreFunctionsConstructor(
             onInitState,
             historyManager

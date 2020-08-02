@@ -191,9 +191,17 @@ const getOrInitStateManager: (
             `Did not find state manager in cache for userId '${userId}', creating one now with initial state`,
             initialState
         )
-        const stateManager: StateManager = stateManagerConstructor.getOrInitUserState(
+        const initialStateWithId = {
+            ...initialState,
+            variables: {
+                ...initialState.variables,
+                userId
+            }
+        }
+        log.fatal('initial state', initialStateWithId, userId)
+        const stateManager: StateManager = stateManagerConstructor.getOrInitStateManager(
             module,
-            initialState,
+            initialStateWithId,
             historyManager
         )
         cache[userId] = stateManager

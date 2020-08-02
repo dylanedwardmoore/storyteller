@@ -4,9 +4,14 @@ import { EventRecord, EventRecordId } from './event-record'
 
 export type StateVariable = JSONValue
 
-// TODO: refactor this to make user info more separate from state?
 export type UserInfo = {
     lastTextMessage: string
+    userId: string
+}
+
+export const defaultUserInfo: UserInfo = {
+    lastTextMessage: '',
+    userId: ''
 }
 
 /*
