@@ -43,7 +43,7 @@ export type StateManager = StateVariableStoreFunctions &
     StateNavigationStoreFunctions
 
 export type StateManagerConstructor = {
-    getOrInitUserState: (
+    getOrInitStateManager: (
         rootModule: ConvoModule,
         onInitState: Stores,
         historyManager: HistoryManager
