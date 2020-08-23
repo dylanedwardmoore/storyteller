@@ -6,10 +6,12 @@ import { UserInfo, defaultUserInfo } from '../core/models/state/state'
  *
  */
 
-export type State = Required<UserInfo & {
+export type State = Required<
+    UserInfo & {
         // Add custom state fields here
         testValue: number
-    }>
+    }
+>
 
 export const initialState: State = {
     ...defaultUserInfo,

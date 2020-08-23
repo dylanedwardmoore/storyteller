@@ -6,7 +6,7 @@ export type Id<T extends string> = Nominal<T, string>
 
 export type IdCollection<T extends string> = Record<string, Id<T>>
 
-export type Timestamp = number
+export type Timestamp = Date
 
 export type ErrorHandler<T = void> = (error: Error) => T
 

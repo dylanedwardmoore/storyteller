@@ -16,7 +16,7 @@ import {
 import ConvoNode from '../models/convo-engine/convo-graph/convo-node'
 import RenderInChat from '../models/chat-client/render-interface'
 import { stateManagerConstructor } from './state-manager'
-import HistoryManager from '../models/state/managers/history-manager'
+import StorageManager from '../models/storage/storage-manager'
 import {
     UserId,
     Stores,
@@ -24,6 +24,9 @@ import {
     GeneralizedStateInstance,
 } from '../models/state/state'
 import ConvoModule from '../models/convo-engine/convo-graph/convo-module'
+import { makeMongoDBStorageManager } from './storage/mongodb-storage-manager'
+import { initialState } from '../../state/state-config'
+import { makeStorageManager } from './storage/storage-manager'
 
 const choiceMatchesUserInput: (
     userInput: string,
@@ -45,14 +48,14 @@ const displayConvoNode: (
     chatRenderFunctions,
     keyboardButtons,
     stateInstance
-) => convoNode => {
+) => async convoNode => {
     switch (convoNode.__TYPE__) {
         case 'image-node':
             const errorHandler = onError(
                 `Error evaluating image source`,
                 'SERVER ERROR'
             )
-            chatRenderFunctions.replyImage(
+            await chatRenderFunctions.replyImage(
                 evaluateFilePath(convoNode.src, errorHandler, stateInstance),
                 keyboardButtons
             )
@@ -64,7 +67,7 @@ const displayConvoNode: (
                 stateInstance
             )
             log.debug(`send reply`, replyText)
-            chatRenderFunctions.replyText(replyText, keyboardButtons)
+            await chatRenderFunctions.replyText(replyText, keyboardButtons)
             break
         default:
             log.trace('Error! This should be unreachable code')
@@ -176,13 +179,13 @@ type GetOrInitStateManagerParams = {
     cache: Record<string, StateManager>
     module: ConvoModule
     initialState: Stores
-    historyManager: HistoryManager
+    storageManager: StorageManager
 }
 
 const getOrInitStateManager: (
     params: GetOrInitStateManagerParams
-) => StateManager = params => {
-    const { userId, cache, module, initialState, historyManager } = params
+) => Promise<StateManager> = async params => {
+    const { userId, cache, module, initialState, storageManager: storageManager } = params
     if (cache[userId] !== undefined) {
         log.debug(`Found state manager in cache for userId '${userId}'`)
         return cache[userId]
@@ -195,37 +198,34 @@ const getOrInitStateManager: (
             ...initialState,
             variables: {
                 ...initialState.variables,
-                userId
-            }
+                userId,
+            },
         }
-        log.fatal('initial state', initialStateWithId, userId)
-        const stateManager: StateManager = stateManagerConstructor.getOrInitStateManager(
+        const stateManager: StateManager = await stateManagerConstructor.getOrInitStateManager(
             module,
             initialStateWithId,
-            historyManager
+            storageManager
         )
         cache[userId] = stateManager
         return stateManager
     }
 }
 
-export const convoManagerConstructor: ConvoManagerConstructor = (
-    module,
-    initialState
-) => {
+export const convoManagerConstructor: ConvoManagerConstructor = config => {
+    const { auth, initialState, rootModule } = config
     const cache: Record<string, StateManager> = {}
+
+    const storageManager: StorageManager = makeStorageManager(auth)
     return {
-        respondToUserInput: (userId, userInput, chatRenderFunctions) => {
+        respondToUserInput: async (userId, userInput, chatRenderFunctions) => {
             // init state manager or pull from cache
             // init navigation manager or pull from cache
-            const historyManager: HistoryManager = {}
-
-            const stateManager: StateManager = getOrInitStateManager({
+            const stateManager: StateManager = await getOrInitStateManager({
                 cache,
                 userId,
-                module,
+                module: rootModule,
                 initialState,
-                historyManager,
+                storageManager: storageManager,
             })
 
             // Find the matching user choice for the given user input at the current convoNode
@@ -270,7 +270,7 @@ export const convoManagerConstructor: ConvoManagerConstructor = (
                         currentConvoSegment.choices
                     )
                     const defaultResponse = `Sorry, I don't recognize your response of <i>${userInput}</i> right now. Try responding with one of the buttons in the chat keyboard.`
-                    chatRenderFunctions.replyText(
+                    await chatRenderFunctions.replyText(
                         defaultResponse,
                         keyboardButtons
                     )

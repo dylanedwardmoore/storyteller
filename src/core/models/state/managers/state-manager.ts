@@ -13,7 +13,7 @@ import {
 import { Nominal } from '../../common/common-types'
 import ConvoSegment from '../../convo-engine/convo-graph/convo-segment'
 import ConvoModule from '../../convo-engine/convo-graph/convo-module'
-import HistoryManager from './history-manager'
+import StorageManager from '../../storage/storage-manager'
 import { Either } from 'fp-ts/lib/Either'
 
 export interface StateNavigationStoreFunctions {
@@ -34,10 +34,6 @@ export interface StateNavigationFunctions {
     getAbsolutePath: (path: ConvoSegmentPath) => AbsoluteConvoSegmentPath
 }
 
-// export type StateDependant<T> = (stateVariableFunctions: StateVariableStoreFunctions) => T
-
-// export type StateDependantNominal<K, T> = Nominal<K, StateDependant<T>>
-
 export type StateManager = StateVariableStoreFunctions &
     StateNavigationFunctions &
     StateNavigationStoreFunctions
@@ -46,8 +42,8 @@ export type StateManagerConstructor = {
     getOrInitStateManager: (
         rootModule: ConvoModule,
         onInitState: Stores,
-        historyManager: HistoryManager
-    ) => StateManager
+        historyManager: StorageManager
+    ) => Promise<StateManager>
 }
 
 export default StateManager

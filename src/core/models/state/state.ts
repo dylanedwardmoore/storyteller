@@ -1,6 +1,7 @@
 import { JSONValue, PlainObject, Id } from '../common/common-types'
 import { ConvoSegmentPath } from '../convo-engine/convo-graph/convo-path'
-import { EventRecord, EventRecordId } from './event-record'
+import Event from '../storage/event'
+
 
 export type StateVariable = JSONValue
 
@@ -11,13 +12,12 @@ export type UserInfo = {
 
 export const defaultUserInfo: UserInfo = {
     lastTextMessage: '',
-    userId: ''
+    userId: '',
 }
 
 /*
  * To make the core agnostic from content,
- * we normalize all incoming state types to
- * GeneralizedState, as defined here.
+ * we ignore explicit typing for state variables
  */
 export type GeneralizedState = PlainObject<StateVariable>
 
@@ -25,9 +25,7 @@ export type GeneralizedStateInstance = Readonly<GeneralizedState>
 
 export type GeneralizedStateUpdate = Partial<GeneralizedStateInstance>
 
-export type UserIdNominalType = 'uuid'
-
-export type UserId = Id<UserIdNominalType>
+export type UserId = string
 
 export type NavigationStoreState = {
     currentConvoSegmentPath: Required<ConvoSegmentPath>
@@ -37,14 +35,7 @@ export type VariableStoreState = {
     variables: GeneralizedState & UserInfo
 }
 
-export type UserHistoryState = {
-    history: EventRecord[]
-    revertedEvents: Set<EventRecordId>
-}
-
-export type StateDependentResult<
-    T,
-    S extends GeneralizedStateInstance = GeneralizedStateInstance
-> = (state: S) => Readonly<T>
+export type StateDependentResult<T,
+    S extends GeneralizedStateInstance = GeneralizedStateInstance> = (state: S) => Readonly<T>
 
 export type Stores = VariableStoreState & NavigationStoreState

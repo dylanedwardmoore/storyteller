@@ -7,7 +7,7 @@ import {
 import ConvoModule, {
     ConvoModuleId,
 } from '../models/convo-engine/convo-graph/convo-module'
-import HistoryManager from '../models/state/managers/history-manager'
+import StorageManager from '../models/storage/storage-manager'
 import {
     NavigationStoreState,
     Stores,
@@ -21,12 +21,16 @@ import { Either, tryCatch, fold } from 'fp-ts/lib/Either'
 import ConvoSegment from '../models/convo-engine/convo-graph/convo-segment'
 import { getNominalValue } from '../util/util-functions'
 import log from '../util/logging'
-import { identity } from 'fp-ts/lib/function'
+import { identity, pipe } from 'fp-ts/lib/function'
+import { applyEventsToState } from './storage/event-functions'
+import * as R from 'ramda'
+import * as T from 'fp-ts/lib/Task'
+import Event from '../models/storage/event'
+
 
 const stateNavigationStoreFunctionsConstructor: (
     onInitState: Stores,
-    historyManager: HistoryManager
-) => StateNavigationStoreFunctions = (initialUserState, historyManager) => {
+) => StateNavigationStoreFunctions = (initialUserState) => {
     const cache: NavigationStoreState = {
         currentConvoSegmentPath: initialUserState.currentConvoSegmentPath,
     }
@@ -51,10 +55,19 @@ const stateNavigationStoreFunctionsConstructor: (
     }
 }
 
+
+const retrieveStoredState: (userId: string, storageManager: StorageManager, initialUserState: Stores) => Promise<Stores> = async (userId, storageManager, initialUserState) => {
+    const applyEvents: (e: Event[]) => Stores = R.curry(applyEventsToState)(initialUserState)
+    return await pipe(
+        userId,
+        storageManager.getUserHistory,
+        T.map(applyEvents),
+    )()
+}
+
 const stateVariableStoreFunctionsConstructor: (
-    onInitState: Stores,
-    historyManager: HistoryManager
-) => StateVariableStoreFunctions = (initialUserState, historyManager) => {
+    onInitState: Stores) => StateVariableStoreFunctions = (initialUserState) => {
+    initialUserState.variables.userId
     const cache: VariableStoreState = {
         variables: initialUserState.variables,
     }
@@ -66,13 +79,13 @@ const stateVariableStoreFunctionsConstructor: (
             const { userId, ...previousState } = cache.variables
 
             // userId can never be updated by convo logic.
-            // Note that it is also not advisable to modify lastUserMessage from convo logic, 
+            // Note that it is also not advisable to modify lastUserMessage from convo logic,
             // even though that field is not as strongly protected.
 
             cache.variables = {
                 ...previousState,
                 ...updates,
-                userId
+                userId,
             }
         },
     }
@@ -153,7 +166,7 @@ export const safelyGetConvoSegment: (
     )
 }
 
-// Can cause terminal error
+// Throws error if convo segment not found.
 const getCurrentConvoSegment: (
     rootModule: ConvoModule,
     navigationStoreFunctions: StateNavigationStoreFunctions
@@ -200,19 +213,17 @@ const stateNavigationFunctionsConstructor: (
 }
 
 export const stateManagerConstructor: StateManagerConstructor = {
-    getOrInitStateManager: (rootModule, onInitState, historyManager) => {
-        const stateNavigationStoreFunctions = stateNavigationStoreFunctionsConstructor(
-            onInitState,
-            historyManager
-        )
-        const stateVariableStoreFunctions = stateVariableStoreFunctionsConstructor(
-            onInitState,
-            historyManager
-        )
+    getOrInitStateManager: async (rootModule, onInitState, storageManager) => {
+        const userId = onInitState.variables.userId
+        const cacheFromStorage = await retrieveStoredState(userId, storageManager, onInitState)
+        
+        const stateNavigationStoreFunctions = stateNavigationStoreFunctionsConstructor(cacheFromStorage)
+        const stateVariableStoreFunctions = stateVariableStoreFunctionsConstructor(cacheFromStorage)
         const stateNavigationFunctions = stateNavigationFunctionsConstructor(
             rootModule,
             stateNavigationStoreFunctions
         )
+        
         return {
             ...stateNavigationStoreFunctions,
             ...stateVariableStoreFunctions,

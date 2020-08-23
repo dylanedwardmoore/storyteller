@@ -1,21 +1,13 @@
-import * as dotenv from 'dotenv'
 import { telegramClient } from './core/chat-client/telegram-chat-client'
-import log from './core/util/logging'
 import { convoManagerConstructor } from './core/convo-engine/convo-manager'
 import storytellerContentConfigurations from './storyteller-config'
+import { readAuthFromEnvFile } from './core/util/config/read-from-env'
+import { chatClient } from './core/chat-client/chat-client'
+import log from './core/util/logging'
 
-dotenv.config()
 
-const apiKey = process.env.BOT_TOKEN
-
-if (apiKey === undefined) {
-    const missingApiKeyErrorMessage =
-        '.env file is either not set up or does not contain BOT_TOKEN field'
-    log.fatal(missingApiKeyErrorMessage)
-    throw new Error(missingApiKeyErrorMessage)
-}
-
-const client = telegramClient(apiKey)
+const auth = readAuthFromEnvFile()
+const client = chatClient(auth)
 log.debug(`Initialized telegram client, attempting to run modules`)
 
 client.runModule(storytellerContentConfigurations, convoManagerConstructor)

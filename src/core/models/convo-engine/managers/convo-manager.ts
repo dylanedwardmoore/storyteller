@@ -1,6 +1,7 @@
 import RenderInChat from '../../chat-client/render-interface'
 import ConvoModule from '../convo-graph/convo-module'
 import { Stores } from '../../state/state'
+import { StorageManagerAuth } from '../../storage/auth'
 
 interface ConvoManager {
     respondToUserInput: (
@@ -10,9 +11,12 @@ interface ConvoManager {
     ) => void
 }
 
-export type ConvoManagerConstructor = (
+export type ConvoManagerConfig = {
     rootModule: ConvoModule,
-    initialState: Stores
-) => ConvoManager
+    initialState: Stores,
+    auth: StorageManagerAuth 
+}
+
+export type ConvoManagerConstructor = (config: ConvoManagerConfig) => ConvoManager
 
 export default ConvoManager

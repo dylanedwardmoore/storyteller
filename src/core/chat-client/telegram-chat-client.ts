@@ -4,6 +4,7 @@ import RenderInChat from '../models/chat-client/render-interface'
 import log from '../util/logging'
 import { Stores } from '../models/state/state'
 import { State } from '../../state/state-config'
+import { TelegramAuth } from '../models/chat-client/auth'
 const Keyboard = require('telegraf-keyboard')
 const Telegraf = require('telegraf')
 const session = require('telegraf/session')
@@ -24,13 +25,13 @@ function getKeyboardWithButtons(buttons: string[]) {
 
 function renderWithContext(ctx: TelegrafContext): RenderInChat {
     return {
-        replyText: (text, buttons) => {
+        replyText: async (text, buttons) => {
             log.debug('reply in chat with the text message: ', text)
-            ctx.replyWithHTML(text, getKeyboardWithButtons(buttons).draw())
+            await ctx.replyWithHTML(text, getKeyboardWithButtons(buttons).draw())
         },
-        replyImage: (src, buttons) => {
+        replyImage: async (src, buttons) => {
             log.debug('reply in chat with the image: ', src)
-            ctx.replyWithPhoto(
+            await ctx.replyWithPhoto(
                 { url: `${src}`, filename: `photo.jpg` },
                 getKeyboardWithButtons(buttons).draw()
             )
@@ -38,8 +39,8 @@ function renderWithContext(ctx: TelegrafContext): RenderInChat {
     }
 }
 
-export const telegramClient: ChatClientConstructor = apiKey => {
-    const bot: TelegrafBot = new Telegraf(apiKey)
+export const telegramClient: ChatClientConstructor<TelegramAuth> = auth => {
+    const bot: TelegrafBot = new Telegraf(auth.clientAuth.apiKey)
     return {
         runModule: (storytellerConfig, convoManagerConstructor) => {
             bot.use(session())
@@ -50,10 +51,11 @@ export const telegramClient: ChatClientConstructor = apiKey => {
                     storytellerConfig.startingConvoSegmentPath,
             }
 
-            const convoManager: ConvoManager = convoManagerConstructor(
-                storytellerConfig.rootModule,
-                initStateStores
-            )
+            const convoManager: ConvoManager = convoManagerConstructor({
+                rootModule: storytellerConfig.rootModule,
+                initialState: initStateStores,
+                auth: auth.storageAuth
+            })
 
             bot.on('text', (ctx: any) => {
                 log.debug(`received user input`)
