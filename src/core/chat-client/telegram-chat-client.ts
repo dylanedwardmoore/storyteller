@@ -27,7 +27,10 @@ function renderWithContext(ctx: TelegrafContext): RenderInChat {
     return {
         replyText: async (text, buttons) => {
             log.debug('reply in chat with the text message: ', text)
-            await ctx.replyWithHTML(text, getKeyboardWithButtons(buttons).draw())
+            await ctx.replyWithHTML(
+                text,
+                getKeyboardWithButtons(buttons).draw()
+            )
         },
         replyImage: async (src, buttons) => {
             log.debug('reply in chat with the image: ', src)
@@ -54,7 +57,7 @@ export const telegramClient: ChatClientConstructor<TelegramAuth> = auth => {
             const convoManager: ConvoManager = convoManagerConstructor({
                 rootModule: storytellerConfig.rootModule,
                 initialState: initStateStores,
-                auth: auth.storageAuth
+                auth: auth.storageAuth,
             })
 
             bot.on('text', (ctx: any) => {

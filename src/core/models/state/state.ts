@@ -2,7 +2,6 @@ import { JSONValue, PlainObject, Id } from '../common/common-types'
 import { ConvoSegmentPath } from '../convo-engine/convo-graph/convo-path'
 import Event from '../storage/event'
 
-
 export type StateVariable = JSONValue
 
 export type UserInfo = {
@@ -35,7 +34,9 @@ export type VariableStoreState = {
     variables: GeneralizedState & UserInfo
 }
 
-export type StateDependentResult<T,
-    S extends GeneralizedStateInstance = GeneralizedStateInstance> = (state: S) => Readonly<T>
+export type StateDependentResult<
+    T,
+    S extends GeneralizedStateInstance = GeneralizedStateInstance
+> = (state: S) => Readonly<T>
 
 export type Stores = VariableStoreState & NavigationStoreState

@@ -1,9 +1,8 @@
-
 type MongoStorageType = 'mongo'
 
 export type MongoStorageAuth = {
     type: MongoStorageType
-    username: string 
+    username: string
     password: string
     uri: string
     databaseName: string

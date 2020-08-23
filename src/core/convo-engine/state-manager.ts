@@ -27,10 +27,9 @@ import * as R from 'ramda'
 import * as T from 'fp-ts/lib/Task'
 import Event from '../models/storage/event'
 
-
 const stateNavigationStoreFunctionsConstructor: (
-    onInitState: Stores,
-) => StateNavigationStoreFunctions = (initialUserState) => {
+    onInitState: Stores
+) => StateNavigationStoreFunctions = initialUserState => {
     const cache: NavigationStoreState = {
         currentConvoSegmentPath: initialUserState.currentConvoSegmentPath,
     }
@@ -55,18 +54,24 @@ const stateNavigationStoreFunctionsConstructor: (
     }
 }
 
-
-const retrieveStoredState: (userId: string, storageManager: StorageManager, initialUserState: Stores) => Promise<Stores> = async (userId, storageManager, initialUserState) => {
-    const applyEvents: (e: Event[]) => Stores = R.curry(applyEventsToState)(initialUserState)
+const retrieveStoredState: (
+    userId: string,
+    storageManager: StorageManager,
+    initialUserState: Stores
+) => Promise<Stores> = async (userId, storageManager, initialUserState) => {
+    const applyEvents: (e: Event[]) => Stores = R.curry(applyEventsToState)(
+        initialUserState
+    )
     return await pipe(
         userId,
         storageManager.getUserHistory,
-        T.map(applyEvents),
+        T.map(applyEvents)
     )()
 }
 
 const stateVariableStoreFunctionsConstructor: (
-    onInitState: Stores) => StateVariableStoreFunctions = (initialUserState) => {
+    onInitState: Stores
+) => StateVariableStoreFunctions = initialUserState => {
     initialUserState.variables.userId
     const cache: VariableStoreState = {
         variables: initialUserState.variables,
@@ -215,15 +220,23 @@ const stateNavigationFunctionsConstructor: (
 export const stateManagerConstructor: StateManagerConstructor = {
     getOrInitStateManager: async (rootModule, onInitState, storageManager) => {
         const userId = onInitState.variables.userId
-        const cacheFromStorage = await retrieveStoredState(userId, storageManager, onInitState)
-        
-        const stateNavigationStoreFunctions = stateNavigationStoreFunctionsConstructor(cacheFromStorage)
-        const stateVariableStoreFunctions = stateVariableStoreFunctionsConstructor(cacheFromStorage)
+        const cacheFromStorage = await retrieveStoredState(
+            userId,
+            storageManager,
+            onInitState
+        )
+
+        const stateNavigationStoreFunctions = stateNavigationStoreFunctionsConstructor(
+            cacheFromStorage
+        )
+        const stateVariableStoreFunctions = stateVariableStoreFunctionsConstructor(
+            cacheFromStorage
+        )
         const stateNavigationFunctions = stateNavigationFunctionsConstructor(
             rootModule,
             stateNavigationStoreFunctions
         )
-        
+
         return {
             ...stateNavigationStoreFunctions,
             ...stateVariableStoreFunctions,

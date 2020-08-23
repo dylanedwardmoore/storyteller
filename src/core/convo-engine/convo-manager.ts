@@ -185,7 +185,13 @@ type GetOrInitStateManagerParams = {
 const getOrInitStateManager: (
     params: GetOrInitStateManagerParams
 ) => Promise<StateManager> = async params => {
-    const { userId, cache, module, initialState, storageManager: storageManager } = params
+    const {
+        userId,
+        cache,
+        module,
+        initialState,
+        storageManager: storageManager,
+    } = params
     if (cache[userId] !== undefined) {
         log.debug(`Found state manager in cache for userId '${userId}'`)
         return cache[userId]

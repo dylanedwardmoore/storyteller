@@ -1,6 +1,5 @@
 type TelegramAuthType = 'telegram'
 
-
 export type TelegramAuth = {
     type: TelegramAuthType
     apiKey: string

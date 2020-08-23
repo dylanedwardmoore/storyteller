@@ -12,11 +12,13 @@ interface ConvoManager {
 }
 
 export type ConvoManagerConfig = {
-    rootModule: ConvoModule,
-    initialState: Stores,
-    auth: StorageManagerAuth 
+    rootModule: ConvoModule
+    initialState: Stores
+    auth: StorageManagerAuth
 }
 
-export type ConvoManagerConstructor = (config: ConvoManagerConfig) => ConvoManager
+export type ConvoManagerConstructor = (
+    config: ConvoManagerConfig
+) => ConvoManager
 
 export default ConvoManager
