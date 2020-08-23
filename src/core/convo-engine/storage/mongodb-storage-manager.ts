@@ -10,6 +10,7 @@ import { IEvent } from '../../models/storage/mongoose-schema/event-schema'
 import * as TE from 'fp-ts/lib/TaskEither'
 import * as T from 'fp-ts/lib/Task'
 import { pipe } from 'fp-ts/lib/pipeable'
+import * as R from 'ramda'
 import { applyEventsToState } from './event-functions'
 import { MongoStorageAuth } from '../../models/storage/auth'
 

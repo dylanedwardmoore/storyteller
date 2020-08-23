@@ -23,6 +23,7 @@ import { getNominalValue } from '../util/util-functions'
 import log from '../util/logging'
 import { identity, pipe } from 'fp-ts/lib/function'
 import { applyEventsToState } from './storage/event-functions'
+import * as R from 'ramda'
 import * as T from 'fp-ts/lib/Task'
 import Event from '../models/storage/event'
 
