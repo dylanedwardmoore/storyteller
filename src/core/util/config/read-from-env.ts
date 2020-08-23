@@ -1,7 +1,6 @@
 import * as dotenv from 'dotenv'
 import { ChatClientAuth } from '../../models/chat-client/auth'
 import { StorageManagerAuth } from '../../models/storage/auth'
-import * as R from 'ramda'
 
 type Auth = {
     clientAuth: ChatClientAuth
