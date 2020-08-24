@@ -12,6 +12,7 @@ import {
     NavigationStoreState,
     Stores,
     VariableStoreState,
+    GeneralizedState,
 } from '../models/state/state'
 import {
     ConvoSegmentPath,
@@ -29,12 +30,11 @@ import Event from '../models/storage/event'
 
 const stateNavigationStoreFunctionsConstructor: (
     onInitState: Stores,
-    storageManager: StorageManager,
+    storageManager: StorageManager
 ) => StateNavigationStoreFunctions = (initialUserState, storageManager) => {
     const cache: NavigationStoreState = {
         currentConvoSegmentPath: initialUserState.currentConvoSegmentPath,
     }
-    
 
     return {
         setCurrentConvoSegmentPath: path => {
@@ -72,7 +72,7 @@ const retrieveStoredState: (
 
 const stateVariableStoreFunctionsConstructor: (
     onInitState: Stores,
-    storageManager: StorageManager,
+    storageManager: StorageManager
 ) => StateVariableStoreFunctions = (initialUserState, storageManager) => {
     initialUserState.variables.userId
     const cache: VariableStoreState = {
@@ -82,6 +82,7 @@ const stateVariableStoreFunctionsConstructor: (
     return {
         getState: () => cache.variables,
         updateState: updates => {
+            eventFromDiff()
             const { userId, ...previousState } = cache.variables
 
             // userId can never be updated by convo logic.

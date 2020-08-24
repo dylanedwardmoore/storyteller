@@ -45,13 +45,13 @@ const displayConvoNode: (
     chatRenderFunctions: RenderInChat,
     stateInstance: Readonly<GeneralizedState>,
     keyboardButtons: string[],
-    convoNode: ConvoNode, 
+    convoNode: ConvoNode,
     prev: Promise<ClientCtx> | undefined
 ) => Promise<ClientCtx> = (
     chatRenderFunctions,
     stateInstance,
     keyboardButtons,
-    convoNode, 
+    convoNode,
     prev
 ) => {
     switch (convoNode.__TYPE__) {
@@ -61,13 +61,23 @@ const displayConvoNode: (
                 'SERVER ERROR'
             )
             if (prev !== undefined) {
-                return prev.then(() => chatRenderFunctions.replyImage(
-                    evaluateFilePath(convoNode.src, errorHandler, stateInstance),
-                    keyboardButtons
-                ))
+                return prev.then(() =>
+                    chatRenderFunctions.replyImage(
+                        evaluateFilePath(
+                            convoNode.src,
+                            errorHandler,
+                            stateInstance
+                        ),
+                        keyboardButtons
+                    )
+                )
             } else {
                 return chatRenderFunctions.replyImage(
-                    evaluateFilePath(convoNode.src, errorHandler, stateInstance),
+                    evaluateFilePath(
+                        convoNode.src,
+                        errorHandler,
+                        stateInstance
+                    ),
                     keyboardButtons
                 )
             }
@@ -78,7 +88,9 @@ const displayConvoNode: (
                 stateInstance
             )
             if (prev !== undefined) {
-                return prev.then(() => chatRenderFunctions.replyText(replyText, keyboardButtons))
+                return prev.then(() =>
+                    chatRenderFunctions.replyText(replyText, keyboardButtons)
+                )
             } else {
                 return chatRenderFunctions.replyText(replyText, keyboardButtons)
             }
@@ -114,16 +126,20 @@ const keyboardButtonsFromChoices: (
 /**
  * A message generator fn, where the dynamic messages indicates that the convo is loading
  */
-const getLoadingMessage: (maxNumDots: number) => () => string = (maxNumDots: number) => {
+const getLoadingMessage: (maxNumDots: number) => () => string = (
+    maxNumDots: number
+) => {
     let currentCount: number = maxNumDots
     const loadingSymbol = '.'
     return () => {
-        currentCount = currentCount % (maxNumDots + 1) + 1
+        currentCount = (currentCount % (maxNumDots + 1)) + 1
         return Array(currentCount + 1).join(loadingSymbol)
     }
 }
 
-const executeAction: (params: ExecuteActionParams) => Promise<void> = async params => {
+const executeAction: (
+    params: ExecuteActionParams
+) => Promise<void> = async params => {
     const { action, stateManager, chatRenderFunctions } = params
     log.debug(`Executing action`, action)
     switch (action.type) {
@@ -133,28 +149,29 @@ const executeAction: (params: ExecuteActionParams) => Promise<void> = async para
             stateManager.setCurrentConvoSegmentPath(action.path)
             const convoSegment = stateManager.getCurrentConvoSegment()
             const dots = getLoadingMessage(5)
-            
+
             // To prevent the user from clicking while convo nodes are still loading, we hide keyboard options until rendering the last node
-            const keyboardButtons = (hide: boolean) => hide ? [dots()] : keyboardButtonsFromChoices(
-                stateManager.getState(),
-                convoSegment.choices
-            )
-            const displayNodeAfterPrevResponse = R.curry(displayConvoNode)
-                (chatRenderFunctions)
-                (stateManager.getState())
-            
+            const keyboardButtons = (hide: boolean) =>
+                hide
+                    ? [dots()]
+                    : keyboardButtonsFromChoices(
+                          stateManager.getState(),
+                          convoSegment.choices
+                      )
+            const displayNodeAfterPrevResponse = R.curry(displayConvoNode)(
+                chatRenderFunctions
+            )(stateManager.getState())
+
             // Ugh, the following is imperative & nasty, but I had trouble with getting fp-ts to work here...
-            let res: Promise<ClientCtx> = displayNodeAfterPrevResponse
-                (keyboardButtons(convoSegment.convoNodes.length > 1))
-                (convoSegment.convoNodes[0])
-                (undefined)
+            let res: Promise<ClientCtx> = displayNodeAfterPrevResponse(
+                keyboardButtons(convoSegment.convoNodes.length > 1)
+            )(convoSegment.convoNodes[0])(undefined)
 
             for (let i = 1; i < convoSegment.convoNodes.length; i++) {
                 const node = convoSegment.convoNodes[i]
-                res = displayNodeAfterPrevResponse
-                    (keyboardButtons(i < convoSegment.convoNodes.length - 1))
-                    (node)
-                    (res)
+                res = displayNodeAfterPrevResponse(
+                    keyboardButtons(i < convoSegment.convoNodes.length - 1)
+                )(node)(res)
             }
             await res
             break

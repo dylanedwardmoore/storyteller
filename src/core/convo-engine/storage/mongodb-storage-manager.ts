@@ -57,28 +57,32 @@ const getUserEventHistory: (
     uri: string
 ) => TE.TaskEither<Error, Event[]> = (userId, uri) => {
     log.debug(`Getting all user events for user id ${userId}`)
-    return TE.tryCatch(() => new Promise(async (resolve, reject) => {
-        try {
-            await mongoose.connect(uri, {
-                useNewUrlParser: true,
-                useCreateIndex: true,
-            })
-            const eventsWithUserId = await EventMongoSchema.find(
-                { userId }
-            ).then(events => {
-                log.debug(`found events for user`)
-                const result = events.map(safelyParseEvent)
-                log.silly(
-                    `For user id ${userId} mapped events to `,
-                    result
-                )
-                return result
-            })
-            resolve(eventsWithUserId)
-        } catch (error) {
-            reject(error)
-        }
-    }), (e: any) => typeof e === typeof Error ? e : new Error(e))
+    return TE.tryCatch(
+        () =>
+            new Promise(async (resolve, reject) => {
+                try {
+                    await mongoose.connect(uri, {
+                        useNewUrlParser: true,
+                        useCreateIndex: true,
+                    })
+                    const eventsWithUserId = await EventMongoSchema.find({
+                        userId,
+                    }).then(events => {
+                        log.debug(`found events for user`)
+                        const result = events.map(safelyParseEvent)
+                        log.silly(
+                            `For user id ${userId} mapped events to `,
+                            result
+                        )
+                        return result
+                    })
+                    resolve(eventsWithUserId)
+                } catch (error) {
+                    reject(error)
+                }
+            }),
+        (e: any) => (typeof e === typeof Error ? e : new Error(e))
+    )
 }
 
 const mongoURI = (mongoAuth: MongoStorageAuth) =>

@@ -3,7 +3,10 @@ import { AbsoluteConvoSegmentPath } from '../convo-engine/convo-graph/convo-path
 import { UserInfo } from '../state/state'
 import { Timestamp } from '../common/common-types'
 
-type EventID = string
+
+export type EventID = string
+
+export type IDGenerator = () => EventID
 
 export type EventUpdate =
     | StateUpdate
@@ -15,7 +18,7 @@ export type EventType =
     | 'update-convo-segment-path-event'
     | 'update-user-info'
 
-type RevertableEvent<T extends EventType, U extends EventUpdate> = {
+export type RevertableEvent<T extends EventType, U extends EventUpdate> = {
     eventId: EventID
     userId: string
     type: T
@@ -25,14 +28,14 @@ type RevertableEvent<T extends EventType, U extends EventUpdate> = {
     reverts?: EventID
 }
 
-type UpdateStateEvent = RevertableEvent<'update-state-event', StateUpdate>
+export type UpdateStateEvent = RevertableEvent<'update-state-event', StateUpdate>
 
-type UpdateConvoSegmentPathEvent = RevertableEvent<
+export type UpdateConvoSegmentPathEvent = RevertableEvent<
     'update-convo-segment-path-event',
     AbsoluteConvoSegmentPath
 >
 
-type UpdateUserInfoEvent = RevertableEvent<
+export type UpdateUserInfoEvent = RevertableEvent<
     'update-user-info',
     Partial<UserInfo>
 >
