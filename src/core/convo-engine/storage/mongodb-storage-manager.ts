@@ -2,7 +2,6 @@ import StorageManager, {
     StorageManagerConstructor,
 } from '../../models/storage/storage-manager'
 import log from '../../util/logging'
-import { MongoClient } from 'mongodb'
 import { Stores } from '../../models/state/state'
 import Event, { EventUpdate, EventType } from '../../models/storage/event'
 import EventMongoSchema from '../../models/storage/mongoose-schema/event-schema'
@@ -13,6 +12,8 @@ import { pipe } from 'fp-ts/lib/pipeable'
 import * as R from 'ramda'
 import { applyEventsToState } from './event-functions'
 import { MongoStorageAuth } from '../../models/storage/auth'
+import { MongoClient } from 'mongodb'
+import mongoose from 'mongoose'
 
 const handleErrorIfNotNull = (error: Error) => {
     if (error) {
@@ -53,31 +54,31 @@ const safelyParseEvent: (
 
 const getUserEventHistory: (
     userId: string,
-    client: MongoClient
-) => TE.TaskEither<Error, Event[]> = (userId, client) => {
+    uri: string
+) => TE.TaskEither<Error, Event[]> = (userId, uri) => {
     log.debug(`Getting all user events for user id ${userId}`)
-    return TE.tryCatch(
-        R.always(
-            new Promise(resolve =>
-                client.connect(async (error: Error) => {
-                    handleErrorIfNotNull(error)
-                    const eventsWithUserId = await EventMongoSchema.find({
-                        id: userId,
-                    }).then(events => {
-                        const result = events.map(safelyParseEvent)
-                        log.silly(
-                            `For user id ${userId} mapped events to `,
-                            result
-                        )
-                        return result
-                    })
-                    client.close()
-                    resolve(eventsWithUserId)
-                })
-            )
-        ),
-        reason => new Error(String(reason))
-    )
+    return TE.tryCatch(() => new Promise(async (resolve, reject) => {
+        try {
+            await mongoose.connect(uri, {
+                useNewUrlParser: true,
+                useCreateIndex: true,
+            })
+            const eventsWithUserId = await EventMongoSchema.find(
+                { userId }
+            ).then(events => {
+                log.debug(`found events for user`)
+                const result = events.map(safelyParseEvent)
+                log.silly(
+                    `For user id ${userId} mapped events to `,
+                    result
+                )
+                return result
+            })
+            resolve(eventsWithUserId)
+        } catch (error) {
+            reject(error)
+        }
+    }), (e: any) => typeof e === typeof Error ? e : new Error(e))
 }
 
 const mongoURI = (mongoAuth: MongoStorageAuth) =>
@@ -85,19 +86,10 @@ const mongoURI = (mongoAuth: MongoStorageAuth) =>
 
 export const makeMongoDBStorageManager: StorageManagerConstructor<MongoStorageAuth> = mongoAuth => {
     // Establish connection to remote mongodb
-    const client = new MongoClient(mongoURI(mongoAuth), {
-        useNewUrlParser: true,
-    })
+    const uri = mongoURI(mongoAuth)
 
     return {
         getUserHistory: userId => {
-            // TODO: move commented out code to state manager
-
-            // const applyEventsToInitialState = pipe(
-            //     initialState,
-            //     R.curry(applyEventsToState)
-            // )
-            // TE.map(applyEventsToInitialState),
             const errorHandling: (error: Error) => T.Task<Event[]> = (
                 error: Error
             ) => {
@@ -109,7 +101,7 @@ export const makeMongoDBStorageManager: StorageManagerConstructor<MongoStorageAu
             }
 
             return pipe(
-                getUserEventHistory(userId, client),
+                getUserEventHistory(userId, uri),
                 TE.getOrElse(errorHandling)
             )
         },

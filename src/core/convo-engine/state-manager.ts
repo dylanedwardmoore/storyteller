@@ -28,12 +28,13 @@ import * as T from 'fp-ts/lib/Task'
 import Event from '../models/storage/event'
 
 const stateNavigationStoreFunctionsConstructor: (
-    onInitState: Stores
-) => StateNavigationStoreFunctions = initialUserState => {
+    onInitState: Stores,
+    storageManager: StorageManager,
+) => StateNavigationStoreFunctions = (initialUserState, storageManager) => {
     const cache: NavigationStoreState = {
         currentConvoSegmentPath: initialUserState.currentConvoSegmentPath,
     }
-    // Restore history to cache using history manager
+    
 
     return {
         setCurrentConvoSegmentPath: path => {
@@ -70,13 +71,13 @@ const retrieveStoredState: (
 }
 
 const stateVariableStoreFunctionsConstructor: (
-    onInitState: Stores
-) => StateVariableStoreFunctions = initialUserState => {
+    onInitState: Stores,
+    storageManager: StorageManager,
+) => StateVariableStoreFunctions = (initialUserState, storageManager) => {
     initialUserState.variables.userId
     const cache: VariableStoreState = {
         variables: initialUserState.variables,
     }
-    // Restore history to cache using history manager
 
     return {
         getState: () => cache.variables,
@@ -227,10 +228,12 @@ export const stateManagerConstructor: StateManagerConstructor = {
         )
 
         const stateNavigationStoreFunctions = stateNavigationStoreFunctionsConstructor(
-            cacheFromStorage
+            cacheFromStorage,
+            storageManager
         )
         const stateVariableStoreFunctions = stateVariableStoreFunctionsConstructor(
-            cacheFromStorage
+            cacheFromStorage,
+            storageManager
         )
         const stateNavigationFunctions = stateNavigationFunctionsConstructor(
             rootModule,

@@ -27,14 +27,14 @@ function renderWithContext(ctx: TelegrafContext): RenderInChat {
     return {
         replyText: async (text, buttons) => {
             log.debug('reply in chat with the text message: ', text)
-            await ctx.replyWithHTML(
+            return ctx.replyWithHTML(
                 text,
                 getKeyboardWithButtons(buttons).draw()
             )
         },
         replyImage: async (src, buttons) => {
             log.debug('reply in chat with the image: ', src)
-            await ctx.replyWithPhoto(
+            return ctx.replyWithPhoto(
                 { url: `${src}`, filename: `photo.jpg` },
                 getKeyboardWithButtons(buttons).draw()
             )

@@ -11,12 +11,46 @@ export const root = make.module({
             id: '/start',
             convo: [
                 {
+                    type: 'image',
+                    src:
+                        'https://imaging.nikon.com/lineup/dslr/df/img/sample/img_01.jpg',
+                },
+                {
                     type: 'text',
                     text: state => `this chatbot says welcome ${state.userId}`,
                 },
                 {
                     type: 'text',
-                    text: state => 'test value is ' + state.testValue,
+                    text: state => '1test value is ' + state.testValue,
+                },
+                {
+                    type: 'text',
+                    text: state => '2test value is ' + state.testValue,
+                },
+                {
+                    type: 'text',
+                    text: state => '3test value is ' + state.testValue,
+                },
+                {
+                    type: 'text',
+                    text: state => '4test value is ' + state.testValue,
+                },
+                {
+                    type: 'text',
+                    text: state => '5test value is ' + state.testValue,
+                },
+                {
+                    type: 'text',
+                    text: state => '6test value is ' + state.testValue,
+                },
+                {
+                    type: 'text',
+                    text: state => '7test value is ' + state.testValue,
+                },
+                {
+                    type: 'image',
+                    src:
+                        'https://imaging.nikon.com/lineup/dslr/df/img/sample/img_01.jpg',
                 },
             ],
             choices: [

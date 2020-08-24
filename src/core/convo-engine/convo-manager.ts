@@ -14,7 +14,7 @@ import {
     ConvoLogicAction,
 } from '../models/convo-engine/convo-graph/convo-logic'
 import ConvoNode from '../models/convo-engine/convo-graph/convo-node'
-import RenderInChat from '../models/chat-client/render-interface'
+import RenderInChat, { ClientCtx } from '../models/chat-client/render-interface'
 import { stateManagerConstructor } from './state-manager'
 import StorageManager from '../models/storage/storage-manager'
 import {
@@ -27,6 +27,7 @@ import ConvoModule from '../models/convo-engine/convo-graph/convo-module'
 import { makeMongoDBStorageManager } from './storage/mongodb-storage-manager'
 import { initialState } from '../../state/state-config'
 import { makeStorageManager } from './storage/storage-manager'
+import * as R from 'ramda'
 
 const choiceMatchesUserInput: (
     userInput: string,
@@ -42,36 +43,45 @@ const choiceMatchesUserInput: (
 
 const displayConvoNode: (
     chatRenderFunctions: RenderInChat,
+    stateInstance: Readonly<GeneralizedState>,
     keyboardButtons: string[],
-    stateInstance: Readonly<GeneralizedState>
-) => (convoNode: ConvoNode) => void = (
+    convoNode: ConvoNode, 
+    prev: Promise<ClientCtx> | undefined
+) => Promise<ClientCtx> = (
     chatRenderFunctions,
+    stateInstance,
     keyboardButtons,
-    stateInstance
-) => async convoNode => {
+    convoNode, 
+    prev
+) => {
     switch (convoNode.__TYPE__) {
         case 'image-node':
             const errorHandler = onError(
                 `Error evaluating image source`,
                 'SERVER ERROR'
             )
-            await chatRenderFunctions.replyImage(
-                evaluateFilePath(convoNode.src, errorHandler, stateInstance),
-                keyboardButtons
-            )
-            break
+            if (prev !== undefined) {
+                return prev.then(() => chatRenderFunctions.replyImage(
+                    evaluateFilePath(convoNode.src, errorHandler, stateInstance),
+                    keyboardButtons
+                ))
+            } else {
+                return chatRenderFunctions.replyImage(
+                    evaluateFilePath(convoNode.src, errorHandler, stateInstance),
+                    keyboardButtons
+                )
+            }
         case 'text-node':
             const replyText = evaluateText(
                 convoNode.text,
                 onError('Error evaluating convoNode text', 'SERVER ERROR'),
                 stateInstance
             )
-            log.debug(`send reply`, replyText)
-            await chatRenderFunctions.replyText(replyText, keyboardButtons)
-            break
-        default:
-            log.trace('Error! This should be unreachable code')
-            break
+            if (prev !== undefined) {
+                return prev.then(() => chatRenderFunctions.replyText(replyText, keyboardButtons))
+            } else {
+                return chatRenderFunctions.replyText(replyText, keyboardButtons)
+            }
     }
 }
 
@@ -101,7 +111,19 @@ const keyboardButtonsFromChoices: (
     return choices.map(keyboardButtonFromChoiceWithState)
 }
 
-const executeAction: (params: ExecuteActionParams) => void = params => {
+/**
+ * A message generator fn, where the dynamic messages indicates that the convo is loading
+ */
+const getLoadingMessage: (maxNumDots: number) => () => string = (maxNumDots: number) => {
+    let currentCount: number = maxNumDots
+    const loadingSymbol = '.'
+    return () => {
+        currentCount = currentCount % (maxNumDots + 1) + 1
+        return Array(currentCount + 1).join(loadingSymbol)
+    }
+}
+
+const executeAction: (params: ExecuteActionParams) => Promise<void> = async params => {
     const { action, stateManager, chatRenderFunctions } = params
     log.debug(`Executing action`, action)
     switch (action.type) {
@@ -110,17 +132,31 @@ const executeAction: (params: ExecuteActionParams) => void = params => {
             log.debug(`Set convo path to `, action.path)
             stateManager.setCurrentConvoSegmentPath(action.path)
             const convoSegment = stateManager.getCurrentConvoSegment()
-            const keyboardButtons = keyboardButtonsFromChoices(
+            const dots = getLoadingMessage(5)
+            
+            // To prevent the user from clicking while convo nodes are still loading, we hide keyboard options until rendering the last node
+            const keyboardButtons = (hide: boolean) => hide ? [dots()] : keyboardButtonsFromChoices(
                 stateManager.getState(),
                 convoSegment.choices
             )
-            convoSegment.convoNodes.forEach(
-                displayConvoNode(
-                    chatRenderFunctions,
-                    keyboardButtons,
-                    stateManager.getState()
-                )
-            )
+            const displayNodeAfterPrevResponse = R.curry(displayConvoNode)
+                (chatRenderFunctions)
+                (stateManager.getState())
+            
+            // Ugh, the following is imperative & nasty, but I had trouble with getting fp-ts to work here...
+            let res: Promise<ClientCtx> = displayNodeAfterPrevResponse
+                (keyboardButtons(convoSegment.convoNodes.length > 1))
+                (convoSegment.convoNodes[0])
+                (undefined)
+
+            for (let i = 1; i < convoSegment.convoNodes.length; i++) {
+                const node = convoSegment.convoNodes[i]
+                res = displayNodeAfterPrevResponse
+                    (keyboardButtons(i < convoSegment.convoNodes.length - 1))
+                    (node)
+                    (res)
+            }
+            await res
             break
         case 'update-state-data-action':
             log.debug(`Update state with state updates: `, action.updates)
