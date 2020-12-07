@@ -9,7 +9,7 @@
     "watch-ts": "tsc -w",
     "deploy": "git add . && git commit -m Heroku && git push heroku master",
     "start:dev": "nodemon --inspect src/index.ts",
-    "start": "node build/index.js",
+    "start": "nodemon --inspect src/index.ts",
     "lint": "eslint . --ext .ts",
     "prettier-format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "prettier-watch": "onchange 'src/**/*.ts' -- prettier --write {{changed}}"
