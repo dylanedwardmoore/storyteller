@@ -4,7 +4,10 @@
   "description": "An example interactive chatbot server for Dylan Moore's TUMO course on storytelling and software engineering",
   "main": "index.js",
   "scripts": {
-    "herokuSetupAndRun": "npm install && tsc && npm start:dev",
+    "postinstall": "tsc",
+    "watch-node": "nodemon dist/index.js",
+    "watch-ts": "tsc -w",
+    "deploy": "git add . && git commit -m Heroku && git push heroku master",
     "start:dev": "nodemon --inspect src/index.ts",
     "start": "node build/index.js",
     "lint": "eslint . --ext .ts",
