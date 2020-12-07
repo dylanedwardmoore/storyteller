@@ -4,10 +4,9 @@
   "description": "An example interactive chatbot server for Dylan Moore's TUMO course on storytelling and software engineering",
   "main": "index.js",
   "scripts": {
-    "herokuSetupAndRun": "npm install && npm install webpack-dev-server rimraf webpack -g && npm start",
-    "build": "rimraf ./build && tsc",
+    "herokuSetupAndRun": "npm install && tsc && npm start:dev",
     "start:dev": "nodemon --inspect src/index.ts",
-    "start": "npm run build && node build/index.js",
+    "start": "node build/index.js",
     "lint": "eslint . --ext .ts",
     "prettier-format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "prettier-watch": "onchange 'src/**/*.ts' -- prettier --write {{changed}}"
