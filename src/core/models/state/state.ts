@@ -11,7 +11,7 @@ export type UserInfo = {
 
 export const defaultUserInfo: UserInfo = {
     lastTextMessage: '',
-    userId: ''
+    userId: '',
 }
 
 /*

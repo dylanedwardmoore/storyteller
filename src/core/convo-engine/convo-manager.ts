@@ -195,8 +195,8 @@ const getOrInitStateManager: (
             ...initialState,
             variables: {
                 ...initialState.variables,
-                userId
-            }
+                userId,
+            },
         }
         log.fatal('initial state', initialStateWithId, userId)
         const stateManager: StateManager = stateManagerConstructor.getOrInitStateManager(

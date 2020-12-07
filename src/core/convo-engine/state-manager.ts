@@ -66,13 +66,13 @@ const stateVariableStoreFunctionsConstructor: (
             const { userId, ...previousState } = cache.variables
 
             // userId can never be updated by convo logic.
-            // Note that it is also not advisable to modify lastUserMessage from convo logic, 
+            // Note that it is also not advisable to modify lastUserMessage from convo logic,
             // even though that field is not as strongly protected.
 
             cache.variables = {
                 ...previousState,
                 ...updates,
-                userId
+                userId,
             }
         },
     }
