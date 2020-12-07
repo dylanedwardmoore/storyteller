@@ -1,6 +1,6 @@
 # Storyteller
 
-This is an example from Dylan and Sophia's TUMO workshop on designing an interactive storytelling chatbot. All the code here was written during and for this course.
+This is an example from Dylan's TUMO workshop on designing an interactive storytelling chatbot. All the code here was written during and for this course. Special thanks to Sophia Moore for all her help :D
 
 I recommend checking out the example I have in the `modules` folder to get a sense for how to create an interactive story.
 
