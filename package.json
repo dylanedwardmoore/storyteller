@@ -45,7 +45,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "fp-ts": "^2.6.7",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "telegraf": "^3.38.0",
     "telegraf-keyboard": "^1.1.2",
     "tslog": "^2.6.1",
